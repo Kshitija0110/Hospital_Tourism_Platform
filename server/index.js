@@ -121,21 +121,36 @@ app.get('/api/doctors/:id', async (req, res) => {
   }
 });
 
-const fetchHospitals = async () => {
-  try {
-    const response = await axios.get('https://indian-hospitals.p.rapidapi.com/hospitals/Pune', { // Replace with the actual API endpoint
-      headers: {
-        'x-rapidapi-host': 'indian-hospitals.p.rapidapi.com', // Replace with the actual RapidAPI host
-        'x-rapidapi-key': '278363d9admsha3d1143c2acfbcbp13854bjsn9dc90a2936cb',   // Replace with your RapidAPI key
-      },
-    });
-    console.log('Hospital Details:', response.data); // Print the response data to the console
-  } catch (error) {
-    console.error('Error fetching hospital details:', error.message);
-  }
-};
+// const fetchHospitals = async () => {
+  // try {
+    // const response = await axios.get('http://www.communitybenefitinsight.org/api/get_hospitals.php?state=AL', { // Replace with the actual API endpoint
+      // method : 'POST',
+      // 
+      // headers: {
+        // 'Content-Type': 'application/json',
+      // },
+    // });
+     //console.log('Hospital Details:', response.data); // Print the response data to the console
+  // } catch (error) {
+    // console.error('Error fetching hospital details:', error.message);
+  // }
+// };
+// 
+// fetchHospitals();
 
-fetchHospitals();
+// Remove the standalone fetchHospitals function and add this endpoint
+app.get('/api/hospitals/:state', async (req, res) => {
+  try {
+    const stateCode = req.params.state;
+    const response = await axios.get(
+      `http://www.communitybenefitinsight.org/api/get_hospitals.php?state=${stateCode}`
+    );
+    res.json(response.data.slice(0, 9)); // Send only first 3 hospitals
+  } catch (error) {
+    console.error('Error fetching hospital details:', error);
+    res.status(500).json({ error: 'Error fetching hospital details' });
+  }
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {

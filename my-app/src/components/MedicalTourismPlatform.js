@@ -234,6 +234,17 @@ const MedicalTourismPlatform = () => {
         </div>
       </section>
 
+
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={() => navigate('/hospitals')}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+        >
+          <BedDouble className="h-5 w-5" />
+          View All Hospitals
+        </button>
+      </div>
+      
       {/* Chatbot */}
       {isChatOpen && (
         <div className="fixed bottom-24 right-6 w-96 bg-white rounded-xl shadow-2xl border">

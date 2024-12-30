@@ -4,6 +4,7 @@ import MedicalTourismPlatform from './components/MedicalTourismPlatform';
 import DoctorsList from './components/DoctorsList';
 import BookAppointment from './components/BookAppointment';
 import MyAppointments from './components/MyAppointments';
+import HospitalsList from './components/HospitalsList';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route path="/doctors" element={<DoctorsList />} />
       <Route path="/book/:doctorId" element={<BookAppointment />} />
       <Route path="/my-appointments" element={<MyAppointments />} />
+      <Route path="/hospitals" element={<HospitalsList />} />
     </Routes>
   </Router>
   );

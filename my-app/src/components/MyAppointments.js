@@ -71,7 +71,7 @@ const MyAppointments = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {appointment.payment_status}
+                    {appointment.status}
                   </span>
                   <button
                     onClick={() => handleCancelAppointment(appointment.appointment_id)}
