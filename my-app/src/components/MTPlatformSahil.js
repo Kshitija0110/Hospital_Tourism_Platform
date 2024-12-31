@@ -1,35 +1,48 @@
-import axios from 'axios';
 import React, { useState } from 'react';
-import { Search, MapPin, Calendar, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
+import axios from 'axios';
+
+import {
+  Search,
+  MapPin,
+  Calendar,
+  Star,
+  Heart,
+  Activity,
+  MessageCircle,
+  X,
+  Send,
+  Plus,
+  Stethoscope,
+  FileText,
+  Video,
+  Clock,
+  Camera,
+  DollarSign,
+  Globe,
+  User,
+  Settings,
+  BedDouble,
+  Clipboard
+} from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
 import doctorPatientImage from '../assets/doctor_patient.jpg';
-import { useNavigate } from 'react-router-dom';
 
 const MedicalTourismPlatform = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('search');
- 
-  const [selectedFilters, setSelectedFilters] = useState({
-    procedure: '',
-    location: '',
-    priceRange: '',
-    rating: ''
-  });
-
   const [messages, setMessages] = useState([
     { id: 1, text: "Hello! I'm MediBot, your AI healthcare assistant. How can I help you today?", isBot: true }
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
-  
+
   const sendMessage = async () => {
     if (newMessage.trim()) {
       setMessages([...messages, { id: Date.now(), text: newMessage, isBot: false }]);
       setNewMessage('');
+
       try {
-        const response = await axios.post('https://sahilbaviskar-aimedicalchatbot.hf.space/chat', { message: newMessage }); // Updated API 
+        const response = await axios.post('https://sahilbaviskar-aimedicalchatbot.hf.space/chat', { message: newMessage }); // Updated API endpoint
         const aiResponse = response.data.response;
         setMessages((prev) => [...prev, { id: Date.now() + 1, text: aiResponse, isBot: true }]);
       } catch (error) {
@@ -41,7 +54,6 @@ const MedicalTourismPlatform = () => {
       }
     }
   };
-
 
   const procedures = [
     { id: 1, name: 'Heart Surgery', cost: '$15,000-$25,000', recovery: '4-6 weeks' },
@@ -70,30 +82,19 @@ const MedicalTourismPlatform = () => {
     }
   ];
 
-
-  const generateAIResponse = (query) => {
-    const keywords = query.toLowerCase();
-    if (keywords.includes('cost') || keywords.includes('price')) {
-      return "Based on your location and treatment requirements, I recommend exploring options in Thailand. The average cost for this procedure ranges from $8,000-$15,000, including hospital stays.";
-    }
-    return "I can help you find suitable medical facilities and arrange consultations. Could you specify your preferred treatment type?";
-  };
-
   const Features = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {[
-        { icon: <Stethoscope />, title: 'Find Your Specialist', desc: 'Filter doctors by specialty meet your needs' },
-        { icon: <FileText />, title: 'Smart Appointments', desc: 'Book doctors by specialty, date, and slot with easy payments.' },
-        { icon: <BedDouble />, title: 'Hospital Insights', desc: 'View hospital details, doctors, and available treatments' },
-        { icon: <Clipboard />, title: 'Personalized Care', desc: 'Receive AI-driven health recommendations tailored to you' },
-        { icon: <Activity />, title: 'Treatment Explorer', desc: 'Discover treatment options with intuitive, detailed cards' },
-        { icon: <MessageCircle />, title: 'Medicare chatbot', desc: 'Get instant answers with our AI-powered chatbot' }
+        { icon: <Stethoscope />, title: 'Virtual Consultation', desc: 'Connect with doctors globally' },
+        { icon: <FileText />, title: 'Medical Records', desc: 'Secure document sharing' },
+        { icon: <BedDouble />, title: 'Hospital Booking', desc: 'Reserve your treatment' },
+        { icon: <Clipboard />, title: 'Treatment Plans', desc: 'Personalized care protocols' },
+        { icon: <Video />, title: 'Remote Follow-up', desc: 'Post-procedure care' },
+        { icon: <Globe />, title: 'Travel Assistance', desc: 'Visa and accommodation support' }
       ].map((feature, index) => (
         <Card key={index} className="hover:shadow-lg transition-all hover:-translate-y-1">
           <CardContent className="p-6 flex items-start gap-4">
-            <div className="bg-blue-100 p-3 rounded-lg">
-              {feature.icon}
-            </div>
+            <div className="bg-blue-100 p-3 rounded-lg">{feature.icon}</div>
             <div>
               <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
               <p className="text-gray-600">{feature.desc}</p>
@@ -117,31 +118,18 @@ const MedicalTourismPlatform = () => {
           </h1>
         </div>
         <div className="flex gap-4">
-        <button 
-    onClick={() => navigate('/my-appointments')} 
-    className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
-  >
-    <Calendar className="h-5 w-5" />
-    My Appointments
-  </button>
           <button className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
             <User className="h-5 w-5" />
             Sign In
           </button>
-          <button 
-           onClick={() => navigate('/doctors')} 
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                >
-          <Plus className="h-5 w-5" />
-           Book Consultation
-           </button>
-         
-         
-         
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+            <Plus className="h-5 w-5" />
+            Book Consultation
+          </button>
         </div>
       </div>
-      
 
+      {/* Other components remain unchanged */}
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
         <div className="absolute right-0 top-0 w-1/3 h-full opacity-10">
@@ -149,7 +137,7 @@ const MedicalTourismPlatform = () => {
         </div>
         <h2 className="text-4xl font-bold mb-4">Find Your Path to Better Health</h2>
         <p className="text-xl mb-6">Access Premium Healthcare Worldwide</p>
-        
+
         <div className="bg-white rounded-xl p-4 flex gap-4 items-center">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -172,7 +160,7 @@ const MedicalTourismPlatform = () => {
         <Activity className="h-4 w-4" />
         <AlertTitle>AI-Powered Recommendation</AlertTitle>
         <AlertDescription>
-          Based on your profile and current health needs, we recommend exploring cardiac treatments 
+          Based on your profile and current health needs, we recommend exploring cardiac treatments
           in Thailand during October-November for optimal weather and pricing.
         </AlertDescription>
       </Alert>
@@ -244,16 +232,6 @@ const MedicalTourismPlatform = () => {
         </div>
       </section>
 
-
-      <div className="mt-8 flex justify-center">
-        <button
-          onClick={() => navigate('/hospitals')}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-        >
-          <BedDouble className="h-5 w-5" />
-          View All Hospitals
-        </button>
-      </div>
       
       {/* Chatbot */}
       <div>
@@ -311,4 +289,5 @@ const MedicalTourismPlatform = () => {
     </div>
   );
 };
+
 export default MedicalTourismPlatform;
