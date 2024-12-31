@@ -1,1 +1,1 @@
-# Hosptal_Tourism_Platform
+# Hospital_Tourism_Platform
