@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Calendar, Clock, User, DollarSign,X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/appointments');
+        const response = await fetch(`http://localhost:3001/api/appointments?username=${user.name}`);
         const data = await response.json();
         setAppointments(data);
       } catch (error) {
@@ -19,8 +21,11 @@ const MyAppointments = () => {
       }
     };
 
-    fetchAppointments();
-  }, []);
+    if (user && user.name) {
+      fetchAppointments();
+    }
+  }, [user]);
+  
 
 
   const handleCancelAppointment = async (appointmentId) => {

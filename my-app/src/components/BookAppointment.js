@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import {loadStripe} from '@stripe/stripe-js';
 
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
@@ -14,8 +14,11 @@ import doc7 from '../assets/doc7.png';
 import doc8 from '../assets/doc8.png';
 import doc9 from '../assets/doc9.png';
 import doc10 from '../assets/doc10.png';
+import { useAuth } from '../context/AuthContext';
+
 
 const BookAppointment = () => {
+  const { user } = useAuth();
   const { doctorId } = useParams();
   const [doctor, setDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -23,7 +26,7 @@ const BookAppointment = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTime, setSelectedTime] = useState(null);
 const [showPayment, setShowPayment] = useState(false);
-
+const [bookingId, setBookingId] = useState(null);
   const doctorImages = {
     'doc1': doc1,
     'doc2': doc2,
@@ -78,8 +81,8 @@ const [showPayment, setShowPayment] = useState(false);
   };
 
   const handleBooking = async () => {
-    if (!selectedDate) {
-      alert('Please select a date and time slot');
+    if (!selectedDate || !selectedTime) {
+      alert('Please select both date and time');
       return;
     }
 
@@ -93,23 +96,83 @@ const [showPayment, setShowPayment] = useState(false);
           doctor_id: doctorId,
           appointment_date: selectedDate,
           appointment_time: selectedTime,
-        patient_name: "Test Patient", // You can add a form to collect patient details
-        payment_status: 'paid'
+          patient_email: user.email,
+          patient_name: user.name,
         }),
       });
 
       if (response.ok) {
-        alert('Appointment booked successfully!');
+        const data = await response.json();
+      setBookingId(data.id);
+      return data.id;
       } else {
         alert('Failed to book appointment');
+        return null;
       }
     } catch (err) {
       console.error('Error booking appointment:', err);
       alert('Error booking appointment');
+      return null;
     }
   };
 
+
+  const handleBookingAndPayment = async () => {
+    const bookingResult = await handleBooking();
+    if (bookingResult) {
+      await makePayment();
+    }
+  };
+  
   if (loading || !doctor) return <div>Loading...</div>;
+  const makePayment = async () => {
+    const stripe = await loadStripe('pk_test_51PuIv9Rt4bZZiTQmbMvH1ZRG2w26Pl6vhQfqxjTuX1DsDfM190vQVOW19uxP474IhAkuGeSZt5PVOZM3ui1ZbK0G002M2Bu3bm');
+    
+    const body = {
+      products: [
+        {
+          name: doctor.Name1, // Doctor's name
+          description: doctor.speciality, // Doctor's specialty
+          amount: doctor.fees * 100, // Convert fees from rupees to paise
+          currency: 'inr', // Currency for the payment (Indian Rupees)
+        },
+      ],
+      appointment_date: selectedDate,
+      appointment_time: selectedTime,
+      patient_name: "Test Patient", // You can collect this via a form if needed
+    };
+    
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    try {
+      const response = await fetch('http://localhost:3001/api/create-checkout-session', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body),
+      });
+    
+      if (response.ok) {
+        const session = await response.json();
+        const result = await stripe.redirectToCheckout({
+          sessionId: session.id,
+        });
+    
+        if (result.error) {
+          alert(result.error.message);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(`Error initiating payment: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error('Error during payment:', error);
+      alert('Payment failed');
+    }
+  };
+    
+
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -198,21 +261,16 @@ const [showPayment, setShowPayment] = useState(false);
 
 {!showPayment ? (
   <button
-    onClick={() => {
-      if (selectedDate && selectedTime) {
-        setShowPayment(true);
-      } else {
-        alert('Please select both date and time');
-      }
-    }}
+    onClick={handleBookingAndPayment}
     className="w-full md:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700"
   >
     Book Appointment
   </button>
-) : (
+) 
+: (
   <button
-    onClick={handleBooking}
     className="w-full md:w-auto bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700"
+    onClick={makePayment}
   >
     Make Payment
   </button>

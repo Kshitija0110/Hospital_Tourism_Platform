@@ -5,6 +5,8 @@ import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
 import doctorPatientImage from '../assets/doctor_patient.jpg';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 
 import { auth, signInWithGoogle } from '../firebase';
 import { Mail, Lock } from 'lucide-react';
@@ -20,6 +22,11 @@ const [authData, setAuthData] = useState({
   email: '',
   password: ''
 });
+
+const { isAuthenticated, user, login, logout } = useAuth();
+
+// const [isAuthenticated, setIsAuthenticated] = useState(false);
+// const [user, setUser] = useState(null);
  
   const [selectedFilters, setSelectedFilters] = useState({
     procedure: '',
@@ -65,8 +72,10 @@ const [authData, setAuthData] = useState({
       
       const data = await response.json();
       if (response.ok) {
-        alert(data.message);
+        login(data.user); // Use the login function from context
         setShowAuthModal(false);
+        alert(data.message);
+      
         // Handle successful login/signup
       } else {
         alert(data.message);
@@ -90,9 +99,15 @@ const [authData, setAuthData] = useState({
       const result = await signInWithGoogle();
       if (result) {
         // User successfully signed in
+        const userData = {
+          name: result.user.displayName,
+          email: result.user.email
+        };
+        login(userData); // Use the login function from context
         setShowAuthModal(false);
-        // You can store user info in state here if needed
         alert('Successfully signed in with Google!');
+      
+      
       }
     } catch (error) {
       console.error('Google sign-in error:', error);
@@ -182,23 +197,64 @@ const [authData, setAuthData] = useState({
     <Calendar className="h-5 w-5" />
     My Appointments
   </button>
-          <button 
-           onClick={() => setShowAuthModal(true)} 
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
-            <User className="h-5 w-5" />
-            Sign In
-          </button>
-          <button 
-           onClick={() => navigate('/doctors')} 
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                >
-          <Plus className="h-5 w-5" />
-           Book Consultation
-           </button>
-         
-         
-         
-        </div>
+
+
+  {isAuthenticated && user ? (
+    <div className="relative group">
+      <button 
+        className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
+      >
+        <User className="h-5 w-5 text-blue-600" />
+        <span>{user.name}</span>
+      </button>
+      <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border hidden group-hover:block">
+        <button
+      
+            onClick={() => {
+            logout();
+            setShowAuthModal(false);
+            }}
+          
+          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Sign Out
+        </button>
+      </div>
+    </div>
+  ) : (
+    <button 
+      onClick={() => setShowAuthModal(true)} 
+      className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
+    >
+      <User className="h-5 w-5" />
+      Sign In
+    </button>
+  )}
+
+  <button 
+    onClick={() => navigate('/doctors')} 
+    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+  >
+    <Plus className="h-5 w-5" />
+    Book Consultation
+  </button>
+</div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
       </div>
       
 
@@ -315,7 +371,7 @@ const [authData, setAuthData] = useState({
         </button>
       </div>
 
-      // Add the Auth Modal in your return statement, just before the closing div
+
 {showAuthModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-8 max-w-md w-full">
