@@ -6,10 +6,20 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
 import doctorPatientImage from '../assets/doctor_patient.jpg';
 import { useNavigate } from 'react-router-dom';
 
+import { auth, signInWithGoogle } from '../firebase';
+import { Mail, Lock } from 'lucide-react';
+
 const MedicalTourismPlatform = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('search');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+const [isLogin, setIsLogin] = useState(true);
+const [authData, setAuthData] = useState({
+  name: '',
+  email: '',
+  password: ''
+});
  
   const [selectedFilters, setSelectedFilters] = useState({
     procedure: '',
@@ -39,6 +49,54 @@ const MedicalTourismPlatform = () => {
           { id: Date.now() + 1, text: 'Sorry, something went wrong. Please try again.', isBot: true }
         ]);
       }
+    }
+  };
+
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:3001/auth/${isLogin ? 'login' : 'signup'}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(authData),
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+        setShowAuthModal(false);
+        // Handle successful login/signup
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      alert('Authentication failed');
+    }
+  };
+  
+  const handleGoogleSignIn = async () => {
+    // try {
+      // await signInWithGoogle();
+      // setShowAuthModal(false);
+      //Handle successful Google sign-in
+    // } catch (error) {
+      // console.error('Google sign-in error:', error);
+      // alert('Google sign-in failed');
+    // }
+    try {
+      const result = await signInWithGoogle();
+      if (result) {
+        // User successfully signed in
+        setShowAuthModal(false);
+        // You can store user info in state here if needed
+        alert('Successfully signed in with Google!');
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      alert('Failed to sign in with Google. Please try again.');
     }
   };
 
@@ -124,7 +182,9 @@ const MedicalTourismPlatform = () => {
     <Calendar className="h-5 w-5" />
     My Appointments
   </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
+          <button 
+           onClick={() => setShowAuthModal(true)} 
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
             <User className="h-5 w-5" />
             Sign In
           </button>
@@ -254,6 +314,103 @@ const MedicalTourismPlatform = () => {
           View All Hospitals
         </button>
       </div>
+
+      // Add the Auth Modal in your return statement, just before the closing div
+{showAuthModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-8 max-w-md w-full">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">
+          {isLogin ? 'Sign In' : 'Create Account'}
+        </h2>
+        <button 
+          onClick={() => setShowAuthModal(false)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <X className="h-6 w-6" />
+        </button>
+      </div>
+
+      <form onSubmit={handleAuthSubmit} className="space-y-4">
+        {!isLogin && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
+            <input
+              type="text"
+              value={authData.name}
+              onChange={(e) => setAuthData({...authData, name: e.target.value})}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <input
+              type="email"
+              value={authData.email}
+              onChange={(e) => setAuthData({...authData, email: e.target.value})}
+              className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <input
+              type="password"
+              value={authData.password}
+              onChange={(e) => setAuthData({...authData, password: e.target.value})}
+              className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+        >
+          {isLogin ? 'Sign In' : 'Create Account'}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50"
+        >
+          <User className="h-5 w-5" />
+          Continue with Google
+        </button>
+
+        <p className="text-center text-sm text-gray-600">
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <button
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-blue-600 hover:underline"
+          >
+            {isLogin ? 'Sign Up' : 'Sign In'}
+          </button>
+        </p>
+      </form>
+    </div>
+  </div>
+)}
+
+
       
       {/* Chatbot */}
       <div>

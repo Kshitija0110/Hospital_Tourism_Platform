@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": "^1.x.x",
     "cra-template": "1.2.0",
+    "firebase": "^10.14.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.1",

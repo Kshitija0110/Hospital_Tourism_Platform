@@ -28,6 +28,10 @@ pool.getConnection((err, connection) => {
     connection.release();
   });
   
+  app.use(cors({
+    origin: 'http://localhost:3002', // Your React app port
+    credentials: true
+  }));
 // Get all doctors
 app.get('/api/doctors', async (req, res) => {
   try {
@@ -149,6 +153,148 @@ app.get('/api/hospitals/:state', async (req, res) => {
   } catch (error) {
     console.error('Error fetching hospital details:', error);
     res.status(500).json({ error: 'Error fetching hospital details' });
+  }
+});
+
+
+// Sign Up Route
+app.post('/auth/signup', async (req, res) => {
+  const { name, email, password } = req.body;
+  
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    // Check if user already exists
+    const [existingUsers] = await pool.promise().query(
+      'SELECT * FROM login WHERE email = ?',
+      [email]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Insert new user
+    const [result] = await pool.promise().query(
+      'INSERT INTO login (name, email, password) VALUES (?, ?, ?)',
+      [name, email, password]
+    );
+
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Error during signup:', error);
+    res.status(500).json({ message: 'Database error during signup' });
+  }
+});
+
+// Login Route
+app.post('/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  try {
+    const [users] = await pool.promise().query(
+      'SELECT * FROM login WHERE email = ? AND password = ?',
+      [email, password]
+    );
+
+    if (users.length > 0) {
+      
+      res.json({ 
+        message: 'Login successful',
+       
+        user: {
+          id: users[0].id,
+          name: users[0].name,
+          email: users[0].email
+        }
+      });
+      
+    } else {
+      res.status(401).json({ message: 'Invalid credentials. Please sign up first' });
+    }
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Database error during login' });
+  }
+});
+
+// Google Sign In Route
+// app.post('/auth/google', async (req, res) => {
+  // const { name, email } = req.body;
+// 
+  // if (!name || !email) {
+    // return res.status(400).json({ message: 'Name and email are required' });
+  // }
+// 
+  // try {
+    //Check if user exists
+    // const [existingUsers] = await pool.promise().query(
+      // 'SELECT * FROM login WHERE email = ?',
+      // [email]
+    // );
+// 
+    // if (existingUsers.length === 0) {
+     // Create new user for Google sign in
+      // await pool.promise().query(
+        // 'INSERT INTO login (name, email) VALUES (?, ?)',
+        // [name, email]
+      // );
+    // }
+// 
+    // res.json({ 
+      // message: 'Google sign in successful',
+      // user: {
+        // name,
+        // email
+      // }
+    // });
+  // } catch (error) {
+    // console.error('Error during Google sign in:', error);
+    // res.status(500).json({ message: 'Database error during Google sign in' });
+  // }
+// });
+// 
+
+
+app.post('/auth/google', async (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Name and email are required' });
+  }
+
+  try {
+    // Check if user exists
+    const [existingUsers] = await pool.promise().query(
+      'SELECT * FROM login WHERE email = ?',
+      [email]
+    );
+
+    if (existingUsers.length === 0) {
+      // Create new user for Google sign in
+      await pool.promise().query(
+        'INSERT INTO login (name, email, auth_provider) VALUES (?, ?, "google")',
+        [name, email]
+      );
+    }
+
+    // Return user data
+    res.json({ 
+      message: 'Google sign in successful',
+      user: {
+        name,
+        email
+      }
+    });
+  } catch (error) {
+    console.error('Error during Google sign in:', error);
+    res.status(500).json({ message: 'Database error during Google sign in' });
   }
 });
 
