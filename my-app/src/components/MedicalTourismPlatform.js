@@ -3,9 +3,12 @@ import React, { useState } from 'react';
 import { Search, MapPin, Calendar, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
-import doctorPatientImage from '../assets/doctor_patient.jpg';
+import doctorPatientImage from '../assets/p.jpg';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import cardiology from '../assets/heartDoctor.png';
+import orthopedic from '../assets/knee replacement.png';
+import dental from '../assets/dental-inplant.png';
 
 
 import { auth, signInWithGoogle } from '../firebase';
@@ -24,6 +27,11 @@ const [authData, setAuthData] = useState({
 });
 
 const { isAuthenticated, user, login, logout } = useAuth();
+const procedureImages = {
+  'Cardiac Surgery': cardiology,
+  'Joint Replacement': orthopedic,
+  'Dental Treatment': dental
+};
 
 // const [isAuthenticated, setIsAuthenticated] = useState(false);
 // const [user, setUser] = useState(null);
@@ -115,11 +123,10 @@ const { isAuthenticated, user, login, logout } = useAuth();
     }
   };
 
-
   const procedures = [
-    { id: 1, name: 'Heart Surgery', cost: '$15,000-$25,000', recovery: '4-6 weeks' },
-    { id: 2, name: 'Knee Replacement', cost: '$12,000-$18,000', recovery: '2-3 months' },
-    { id: 3, name: 'Dental Implants', cost: '$3,000-$6,000', recovery: '3-6 months' }
+    { id: 1, name: 'Cardiac Surgery', cost: '$15,000-$25,000', recovery: '4-6 weeks' },
+    { id: 2, name: 'Joint Replacement', cost: '$12,000-$18,000', recovery: '2-3 months' },
+    { id: 3, name: 'Dental Treatment', cost: '$3,000-$6,000', recovery: '3-6 months' }
   ];
 
   const hospitals = [
@@ -239,49 +246,40 @@ const { isAuthenticated, user, login, logout } = useAuth();
     Book Consultation
   </button>
 </div>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-      </div>
+  </div>
       
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-1/3 h-full opacity-10">
-          <Activity className="w-full h-full" />
-        </div>
-        <h2 className="text-4xl font-bold mb-4">Find Your Path to Better Health</h2>
-        <p className="text-xl mb-6">Access Premium Healthcare Worldwide</p>
-        
-        <div className="bg-white rounded-xl p-4 flex gap-4 items-center">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search procedures, doctors, or hospitals..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Search
-          </button>
-        </div>
-      </div>
+<div className="relative h-[400px] rounded-2xl mb-8 overflow-hidden">
+  {/* Left side with text */}
+  <div className="absolute left-0 inset-y-0 w-3/5 bg-blue-600 z-10">
+    <div className="p-8 h-full flex flex-col justify-center">
+      <h2 className="text-4xl font-bold mb-4 text-white">
+        Find Your Path to Better Health
+      </h2>
+      <p className="text-xl mb-6 text-white">
+        Access Premium Healthcare Worldwide
+      </p>
+    </div>
+  </div>
+  
+  {/* Diagonal divider */}
+  <div 
+    className="absolute inset-0 z-20"
+    style={{
+      clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 50% 100%)',
+      background: 'linear-gradient(rgba(37, 99, 235, 0.8), rgba(37, 99, 235, 0.6))'
+    }}
+  >
+    <img
+      src={doctorPatientImage}
+      alt="Doctor with Patient"
+      className="w-full h-[-150%] object-cover"
+    />
+  </div>
+
+  {/* Search bar */}
+</div>
 
       {/* AI Recommendation */}
       <Alert className="mb-8 bg-green-50 border-green-200">
@@ -302,6 +300,11 @@ const { isAuthenticated, user, login, logout } = useAuth();
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {procedures.map(proc => (
             <Card key={proc.id} className="hover:shadow-lg transition-all">
+              <img 
+        src={procedureImages[proc.name]} 
+        alt={proc.name}
+        className="w-full h-48 object-cover rounded-t-lg"
+      />
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-3">{proc.name}</h3>
                 <div className="flex items-center gap-2 text-gray-600 mb-2">
