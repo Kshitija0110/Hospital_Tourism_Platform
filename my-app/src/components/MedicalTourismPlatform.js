@@ -11,7 +11,7 @@ import orthopedic from '../assets/knee replacement.png';
 import dental from '../assets/dental-inplant.png';
 import doctorIcon from '../assets/doctor logo.png';
 import patientIcon from '../assets/patient logo.png';
-
+import DoctorForm from '../components/Doctorform.js';
 
 import { auth, signInWithGoogle } from '../firebase';
 import { Mail, Lock } from 'lucide-react';
@@ -69,6 +69,30 @@ const procedureImages = {
           { id: Date.now() + 1, text: 'Sorry, something went wrong. Please try again.', isBot: true }
         ]);
       }
+    }
+  };
+
+  const handleDoctorSubmit = async (doctorData) => {
+    try {
+      const response = await fetch('http://localhost:3001/auth/doctor-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(doctorData),
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        login(data.user);
+        setShowAuthModal(false);
+        alert('Doctor registration successful!');
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Doctor registration error:', error);
+      alert('Registration failed');
     }
   };
 
@@ -400,9 +424,10 @@ const procedureImages = {
 
 
 {showAuthModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div className="bg-white rounded-lg p-8 max-w-md w-full">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 z-10">
         <h2 className="text-2xl font-bold">
           {isLogin ? 'Sign In' : 'Create Account'}
         </h2>
@@ -452,6 +477,9 @@ const procedureImages = {
         </div>
       )}
       {userType && (
+        userType === 'doctor' ? (
+          <DoctorForm onSubmit={handleDoctorSubmit} />
+        ) : (
       <form onSubmit={handleAuthSubmit} className="space-y-4">
         {!isLogin && (
           <div>
@@ -527,8 +555,9 @@ const procedureImages = {
           </button>
         </p>
       </form>
-      )}
+      ))}
     </div>
+  </div>
   </div>
 )}
 
