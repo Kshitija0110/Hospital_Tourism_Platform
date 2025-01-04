@@ -1,6 +1,6 @@
 import axios from 'axios';
-import React, { useState } from 'react';
-import { Search, MapPin, Calendar, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
+import React, { useState,useEffect } from 'react';
+import { Search, MapPin, Calendar,Phone,Linkedin,Twitter,Instagram, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
 import doctorPatientImage from '../assets/p.jpg';
@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext';
 import cardiology from '../assets/heartDoctor.png';
 import orthopedic from '../assets/knee replacement.png';
 import dental from '../assets/dental-inplant.png';
+import doctorIcon from '../assets/doctor logo.png';
+import patientIcon from '../assets/patient logo.png';
 
 
 import { auth, signInWithGoogle } from '../firebase';
@@ -20,11 +22,13 @@ const MedicalTourismPlatform = () => {
   const [activeTab, setActiveTab] = useState('search');
   const [showAuthModal, setShowAuthModal] = useState(false);
 const [isLogin, setIsLogin] = useState(true);
+const [isMenuOpen, setIsMenuOpen] = useState(false);
 const [authData, setAuthData] = useState({
   name: '',
   email: '',
   password: ''
 });
+
 
 const { isAuthenticated, user, login, logout } = useAuth();
 const procedureImages = {
@@ -48,6 +52,7 @@ const procedureImages = {
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [userType, setUserType] = useState(null);
   
   const sendMessage = async () => {
     if (newMessage.trim()) {
@@ -181,22 +186,37 @@ const procedureImages = {
           </CardContent>
         </Card>
       ))}
+
+      
     </div>
   );
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMenuOpen && !event.target.closest('.menu-container')) {
+        setIsMenuOpen(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-gray-50">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="px-8">
+    {/* Sticky Header */}
+    <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-3 rounded-xl">
-            <Stethoscope className="h-8 w-8 text-white" />
+          <div className="bg-blue-600 p-2 rounded-xl">
+            <Stethoscope className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
             HealthJourney Global
           </h1>
         </div>
-        <div className="flex gap-4">
+
+
         <button 
     onClick={() => navigate('/my-appointments')} 
     className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
@@ -207,27 +227,30 @@ const procedureImages = {
 
 
   {isAuthenticated && user ? (
-    <div className="relative group">
-      <button 
-        className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
-      >
-        <User className="h-5 w-5 text-blue-600" />
-        <span>{user.name}</span>
-      </button>
-      <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border hidden group-hover:block">
+    <div className="relative menu-container">
+    <button 
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
+      className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
+    >
+      <User className="h-5 w-5 text-blue-600" />
+      <span className="text-gray-600">Welcome, {user.name}</span>
+    </button>
+    {isMenuOpen && (
+      <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border">
         <button
-      
-            onClick={() => {
+          onClick={() => {
             logout();
             setShowAuthModal(false);
-            }}
-          
+            setIsMenuOpen(false);
+            navigate('/');
+          }}
           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
         >
-          Sign Out
+          Logout
         </button>
       </div>
-    </div>
+    )}
+  </div>
   ) : (
     <button 
       onClick={() => setShowAuthModal(true)} 
@@ -247,10 +270,11 @@ const procedureImages = {
   </button>
 </div>
   </div>
+  
       
 
       {/* Hero Section */}
-<div className="relative h-[400px] rounded-2xl mb-8 overflow-hidden">
+<div className="relative h-[400px] rounded-2xl mb-8 mt-9 overflow-hidden mt-[100px] ">
   {/* Left side with text */}
   <div className="absolute left-0 inset-y-0 w-3/5 bg-blue-600 z-10">
     <div className="p-8 h-full flex flex-col justify-center">
@@ -284,7 +308,7 @@ const procedureImages = {
       {/* AI Recommendation */}
       <Alert className="mb-8 bg-green-50 border-green-200">
         <Activity className="h-4 w-4" />
-        <AlertTitle>AI-Powered Recommendation</AlertTitle>
+        <AlertTitle>Here's your personalized health Insight</AlertTitle>
         <AlertDescription>
           Based on your profile and current health needs, we recommend exploring cardiac treatments 
           in Thailand during October-November for optimal weather and pricing.
@@ -383,13 +407,51 @@ const procedureImages = {
           {isLogin ? 'Sign In' : 'Create Account'}
         </h2>
         <button 
-          onClick={() => setShowAuthModal(false)}
+          onClick={() => {
+            setShowAuthModal(false);
+            setUserType(null);
+          }}
           className="text-gray-500 hover:text-gray-700"
         >
           <X className="h-6 w-6" />
         </button>
       </div>
 
+       {/* User Type Selection */}
+       {!userType && (
+        <div className="mb-6">
+          <h3 className="text-center text-lg font-medium mb-4">Select User Type</h3>
+          <div className="flex justify-center gap-8">
+            <div
+              onClick={() => setUserType('doctor')}
+              className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              
+              <img 
+          src={doctorIcon} 
+          alt="Doctor"
+          className="w-24 h-24 object-cover rounded-full border-2"
+        />
+         
+              <span className="font-medium">Doctor</span>
+            </div>
+            <div
+              onClick={() => setUserType('patient')}
+              className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              
+              <img 
+          src={patientIcon} 
+          alt="Patient"
+          className="w-24 h-24 object-cover rounded-full border-2 border-black-600"
+        />
+             
+              <span className="font-medium">Patient</span>
+            </div>
+          </div>
+        </div>
+      )}
+      {userType && (
       <form onSubmit={handleAuthSubmit} className="space-y-4">
         {!isLogin && (
           <div>
@@ -465,6 +527,7 @@ const procedureImages = {
           </button>
         </p>
       </form>
+      )}
     </div>
   </div>
 )}
@@ -523,8 +586,67 @@ const procedureImages = {
             </div>
           </div>
         )}
+      
+<footer className="bg-blue-600 text-white mt-16 py-12">
+  <div className="max-w-6xl mx-auto px-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Contact Info */}
+      <div>
+        <h3 className="text-xl font-bold mb-4">Contact Us</h3>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            <a href="mailto:info@medicaltourism.com">info@medicaltourism.com</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            <span>+1 (555) 123-4567</span>
+          </div>
+          <div className="flex items-center gap-4 mt-4">
+            <a href="#" className="hover:text-blue-200"><Linkedin className="h-6 w-6" /></a>
+            <a href="#" className="hover:text-blue-200"><Twitter className="h-6 w-6" /></a>
+            <a href="#" className="hover:text-blue-200"><Instagram className="h-6 w-6" /></a>
+          </div>
+        </div>
+      </div>
+
+      {/* Location */}
+      <div>
+        <h3 className="text-xl font-bold mb-4">Our Location</h3>
+        <div className="flex items-start gap-2">
+          <MapPin className="h-5 w-5 mt-1" />
+          <div>
+            <p>123 Healthcare Avenue</p>
+            <p>Medical District</p>
+            <p>New York, NY 10001</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Services */}
+      <div>
+        <h3 className="text-xl font-bold mb-4">Our Services</h3>
+        <ul className="space-y-2">
+          <li>Medical Tourism Packages</li>
+          <li>International Patient Care</li>
+          <li>Hospital Networks</li>
+          <li>Treatment Planning</li>
+          <li>Travel Assistance</li>
+          <li>Post-treatment Support</li>
+        </ul>
       </div>
     </div>
+
+    <div className="border-t border-blue-400 mt-8 pt-8 text-center">
+      <p>&copy; 2024 Medical Tourism Platform. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+      </div>
+    
+</div>
+   
   );
 };
 export default MedicalTourismPlatform;
