@@ -3,7 +3,7 @@ import {loadStripe} from '@stripe/stripe-js';
 
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
-import { Calendar, Clock, Award, Book, GraduationCap, Stethoscope } from 'lucide-react';
+import { User,Calendar, Clock, Award, Book, GraduationCap, Stethoscope } from 'lucide-react';
 import doc1 from '../assets/doc1.png';
 import doc2 from '../assets/doc2.png';
 import doc3 from '../assets/doc3.png';
@@ -117,6 +117,15 @@ const [bookingId, setBookingId] = useState(null);
   };
 
 
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   const handleBookingAndPayment = async () => {
     const bookingResult = await handleBooking();
     if (bookingResult) {
@@ -179,37 +188,51 @@ const [bookingId, setBookingId] = useState(null);
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Left Column - Doctor's Photo */}
         <div>
+        {doctor?.profile_photo ? (
           <img
-            src={doctorImages[doctor.id]}
-            alt={doctor.Name1}
-            className="w-full rounded-lg shadow-lg h-30"
+            src={`data:image/jpeg;base64,${arrayBufferToBase64(doctor.profile_photo.data)}`}
+            alt={doctor.name1}
+            className="w-full rounded-lg shadow-lg h-30 object-cover"
           />
-        </div>
+        ) : (
+          <div className="w-full h-30 bg-gray-200 rounded-lg flex items-center justify-center">
+            <User className="h-20 w-20 text-gray-400" />
+          </div>
+        )}
+      </div>
 
         {/* Right Column - Doctor's Details */}
         <Card className="h-fit">
           <CardContent className="p-6">
-            <h1 className="text-3xl font-bold mb-4">{doctor.Name1}</h1>
+            <h1 className="text-3xl font-bold mb-4">{doctor?.name1}</h1>
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-gray-600">
                 <Stethoscope className="h-5 w-5" />
-                <span>{doctor.speciality}</span>
+                <span>{doctor?.Speciality}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <GraduationCap className="h-5 w-5" />
-                <span>{doctor.degree}</span>
+                <span>{doctor?.experience_years} Years</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Award className="h-5 w-5" />
-                <span>{doctor.experience} years experience</span>
-              </div>
+              {/* <div className="flex items-center gap-2 text-gray-600"> */}
+                {/* <Award className="h-5 w-5" /> */}
+                {/* <span>{doctor.experience} years experience</span> */}
+              {/* </div> */}
               <div className="flex items-center gap-2 text-gray-600">
                 <Book className="h-5 w-5" />
-                <span>${doctor.fees} Consultation Fee</span>
+                <span>${doctor?.Consultation_Fee} Consultation Fee</span>
               </div>
               <div className="mt-4">
-                <h3 className="font-bold mb-2">About</h3>
-                <p className="text-gray-600">{doctor.about}</p>
+                <h3 className="font-bold mb-2">Contact number</h3>
+                <p className="text-gray-600">{doctor?.phone_number}</p>
+              </div>
+              <div className="mt-4">
+              <h3 className="font-bold mb-2">Email</h3>
+               <p className="text-gray-600">{doctor?.email}</p>
+                  </div>
+              <div className="mt-4">
+              <h3 className="font-bold mb-2">Speciality</h3>
+              <p className="text-gray-600">{doctor?.success_story}</p>
               </div>
             </div>
           </CardContent>

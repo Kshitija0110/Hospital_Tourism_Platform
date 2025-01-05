@@ -65,24 +65,6 @@ const authenticateUser = async (req, res, next) => {
     res.status(500).json({ error: 'Authentication error' });
   }
 };
-
-// Book appointment
-// app.post('/api/appointments', async (req, res) => {
-  // const { doctor_id, patient_name, appointment_date, appointment_time, status } = req.body;
-  // 
-  // try {
-    // const [result] = await pool.promise().query(
-      // `INSERT INTO appointments (doctor_id, patient_name, patient_email,appointment_date, appointment_time, status,created_at) VALUES ( ?, ?, ?, ?,?,'scheduled', 'pending')`,
-      // [doctor_id, user.email,user.name, appointment_date, appointment_time]
-    // );
-    // res.json({ id: result.insertId, message: 'Appointment booked successfully' });
-  // } catch (error) {
-    // console.error(error);
-    // res.status(500).json({ error: 'Error booking appointment' });
-  // }
-// });
-// 
-
 // Book appointment
 app.post('/api/appointments', async (req, res) => {
   const { doctor_id, appointment_date, appointment_time, patient_name, patient_email } = req.body;
@@ -116,15 +98,6 @@ app.post('/api/appointments', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-// 
 // Add this new endpoint to handle appointment cancellation
 app.delete('/api/appointments/:id', async (req, res) => {
   const appointmentId = req.params.id;
@@ -177,7 +150,7 @@ app.get('/api/appointments', async (req, res) => {
 app.get('/api/doctors/:id', async (req, res) => {
   try {
     const [rows] = await pool.promise().query(
-      'SELECT * FROM doctors WHERE id = ?',
+      'SELECT * FROM doc WHERE id = ?',
       [req.params.id]
     );
     console.log('Fetched doctor:', rows[0]);
@@ -274,34 +247,93 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-app.post('/auth/google', async (req, res) => {
-  const { name, email } = req.body;
+// app.post('/auth/google', async (req, res) => {
+  // const { name, email } = req.body;
+// 
+  // if (!name || !email) {
+    // return res.status(400).json({ message: 'Name and email are required' });
+  // }
+// 
+  // try {
+    
+    // const [existingUsers] = await pool.promise().query(
+      // 'SELECT * FROM login WHERE email = ?',
+      // [email]
+    // );
+// 
+    // if (existingUsers.length === 0) {
+      
+      // await pool.promise().query(
+        // 'INSERT INTO login (name, email, auth_provider) VALUES (?, ?, "google")',
+        // [name, email]
+      // );
+    // }
+// 
+    
+    // res.json({ 
+      // message: 'Google sign in successful',
+      // user: {
+        // name,
+        // email
+      // }
+    // });
+  // } catch (error) {
+    // console.error('Error during Google sign in:', error);
+    // res.status(500).json({ message: 'Database error during Google sign in' });
+  // }
+// });
 
-  if (!name || !email) {
-    return res.status(400).json({ message: 'Name and email are required' });
-  }
+app.post('/auth/google', async (req, res) => {
+  const { name, email, userType } = req.body;
 
   try {
+    let table = userType === 'doctor' ? 'doc' : 'login';
+    
     // Check if user exists
     const [existingUsers] = await pool.promise().query(
-      'SELECT * FROM login WHERE email = ?',
+      `SELECT * FROM ${table} WHERE email = ?`,
       [email]
     );
 
     if (existingUsers.length === 0) {
-      // Create new user for Google sign in
-      await pool.promise().query(
-        'INSERT INTO login (name, email, auth_provider) VALUES (?, ?, "google")',
-        [name, email]
-      );
+      // Create new user with appropriate table
+      if (userType === 'doctor') {
+        const [existingDoctors] = await pool.promise().query(
+          'SELECT * FROM doc WHERE email = ?',
+          [email]
+        );
+  
+        if (existingDoctors.length > 0) {
+          return res.status(200).json({
+            message: 'Doctor account exists',
+            user: {
+              name: existingDoctors[0].name1,
+              email: existingDoctors[0].email,
+              userType: 'doctor'
+            }
+          });
+        } else {
+          return res.status(400).json({ 
+            message: 'Please sign up first as a doctor'
+          });
+        }
+      
+      
+      
+    } else {
+        await pool.promise().query(
+          'INSERT INTO login (name, email, auth_provider) VALUES (?, ?, "google")',
+          [name, email]
+        );
+      }
     }
 
-    // Return user data
     res.json({ 
       message: 'Google sign in successful',
       user: {
         name,
-        email
+        email,
+        userType
       }
     });
   } catch (error) {

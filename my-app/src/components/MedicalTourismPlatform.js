@@ -12,7 +12,7 @@ import dental from '../assets/dental-inplant.png';
 import doctorIcon from '../assets/doctor logo.png';
 import patientIcon from '../assets/patient logo.png';
 import DoctorForm from '../components/Doctorform.js';
-
+import googleIcon from '../assets/googleIcon.png';
 import { auth, signInWithGoogle } from '../firebase';
 import { Mail, Lock } from 'lucide-react';
 
@@ -29,6 +29,7 @@ const [authData, setAuthData] = useState({
   password: ''
 });
 
+const [registrationStage, setRegistrationStage] = useState('initial'); // 'initial', 'login', 'signup'
 
 const { isAuthenticated, user, login, logout } = useAuth();
 const procedureImages = {
@@ -104,16 +105,22 @@ const procedureImages = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(authData),
+        body: JSON.stringify({
+          ...authData,
+          userType
+        }),
       });
       
       const data = await response.json();
       if (response.ok) {
-        login(data.user); // Use the login function from context
-        setShowAuthModal(false);
-        alert(data.message);
-      
-        // Handle successful login/signup
+        if (userType === 'doctor' && !isLogin) {
+          // If doctor signup, show the registration form
+          setRegistrationStage('signup');
+        } else {
+          login(data.user);
+          setShowAuthModal(false);
+          alert(data.message);
+        }
       } else {
         alert(data.message);
       }
@@ -123,6 +130,27 @@ const procedureImages = {
     }
   };
   
+  // const handleGoogleSignIn = async () => {
+    // try {
+      // const result = await signInWithGoogle();
+      // if (result) {
+      
+        // const userData = {
+          // name: result.user.displayName,
+          // email: result.user.email
+        // };
+        // login(userData); // Use the login function from context
+        // setShowAuthModal(false);
+        // alert('Successfully signed in with Google!');
+      // 
+      // 
+      // }
+    // } catch (error) {
+      // console.error('Google sign-in error:', error);
+      // alert('Failed to sign in with Google. Please try again.');
+    // }
+  // };
+
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithGoogle();
@@ -130,13 +158,27 @@ const procedureImages = {
         // User successfully signed in
         const userData = {
           name: result.user.displayName,
-          email: result.user.email
+          email: result.user.email,
+          userType: userType // Include the user type
         };
-        login(userData); // Use the login function from context
-        setShowAuthModal(false);
-        alert('Successfully signed in with Google!');
-      
-      
+        
+        // Send to backend with user type
+        const response = await fetch('http://localhost:3001/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          login(data.user);
+          setShowAuthModal(false);
+          alert('Successfully signed in with Google!');
+        } else {
+          // Show the actual error message from server
+          alert(data.message);
+        }
       }
     } catch (error) {
       console.error('Google sign-in error:', error);
@@ -422,12 +464,17 @@ const procedureImages = {
 
       <div className="flex justify-between items-center mb-6 top-0 bg-white pb-4">
         <h2 className="text-2xl font-bold text-center flex-grow">
-          {isLogin ? 'Sign In' : 'Create Account'}
+        {userType === 'doctor' ? (
+      registrationStage === 'login' ? 'Sign In' : 'Sign Up'
+    ) : (
+      isLogin ? 'Sign In' : 'Create Account'
+    )}
         </h2>
         <button 
           onClick={() => {
             setShowAuthModal(false);
             setUserType(null);
+            setRegistrationStage('initial');
           }}
           className="text-gray-500 hover:text-gray-700"
         >
@@ -436,12 +483,15 @@ const procedureImages = {
       </div>
 
        {/* User Type Selection */}
-       {!userType && (
+      {!userType ? (
         <div className="mb-6">
           <h3 className="text-center text-lg font-medium mb-4">Select User Type</h3>
           <div className="flex justify-center gap-8">
             <div
-              onClick={() => setUserType('doctor')}
+              onClick={() =>{
+                 setUserType('doctor');
+                 setRegistrationStage('login');
+                }}
               className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
             >
               
@@ -468,16 +518,83 @@ const procedureImages = {
             </div>
           </div>
         </div>
-      )}
-
-      <div className="overflow-y-auto">
-      {userType && (
+      ) : (
         userType === 'doctor' ? (
-          <DoctorForm onSubmit={handleDoctorSubmit} />
+          registrationStage === 'login' ? (
+            // Doctor Login Form
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <input
+                    type="email"
+                    value={authData.email}
+                    onChange={(e) => setAuthData({...authData, email: e.target.value})}
+                    className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+      
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <input
+                    type="password"
+                    value={authData.password}
+                    onChange={(e) => setAuthData({...authData, password: e.target.value})}
+                    className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+      
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              >
+                Sign 
+              </button>
+              <button
+   type="button"
+   onClick={handleGoogleSignIn}
+   className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50"
+ >
+   <img 
+     src={googleIcon} 
+     alt="Google"
+     className="w-5 h-5"
+   />
+   Continue with Google
+ </button>
+ 
+              <p className="text-center text-sm text-gray-600">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setRegistrationStage('signup')}
+                  className="text-blue-600 hover:underline"
+                >
+                  Sign Up
+                </button>
+              </p>
+            </form>
+
+      
+      
         ) : (
-      <form onSubmit={handleAuthSubmit} className="space-y-4">
-        {!isLogin && (
-          <div>
+          <DoctorForm onSubmit={handleDoctorSubmit} />
+        )
+      ) : (
+        <form onSubmit={handleAuthSubmit} className="space-y-4">
+          {!isLogin && (
+            <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Name
             </label>
@@ -554,7 +671,7 @@ const procedureImages = {
     </div>
   </div>
   </div>
-  </div>
+  
 )}
 
 
