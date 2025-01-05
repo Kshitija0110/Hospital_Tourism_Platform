@@ -31,12 +31,17 @@ const DoctorsList = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
 
   const specialties = [
-    { name: 'General Physician', icon: Stethoscope },
-    { name: 'Gynecologist', icon: User },
-    { name: 'Pediatrician', icon: Baby },
-    { name: 'Neurologist', icon: Brain },
-    { name: 'Cardiologist', icon: Heart },
-    { name: 'Dermatologist', icon: Smile }
+    { name: 'General Medicine', icon: Stethoscope },
+    { name: 'Gynecology', icon: User },
+    { name: 'Pediatrics', icon: Baby },
+    { name: 'Neurology', icon: Brain },
+    { name: 'Cardiology', icon: Heart },
+    { name: 'Dermatology', icon: Smile },
+    { name: 'Orthopedics', icon: Smile },
+    { name: 'Oncology', icon: Smile },
+    { name: 'Ophthalmology', icon: Smile },
+    { name: 'ENT', icon: Smile },
+
   ];
 
 // Create an image map
@@ -60,11 +65,15 @@ const doctorImages = {
       try {
         const response = await fetch('http://localhost:3001/api/doctors');
         const data = await response.json();
-        console.log('Fetched data:', data); // Debug log
         if (Array.isArray(data)) {
-          setDoctors(data);
+          // Convert BLOB to base64 URL for each doctor
+          const doctorsWithImages = data.map(doctor => ({
+            ...doctor,
+            imageUrl: doctor.profile_photo ? `data:image/jpeg;base64,${arrayBufferToBase64(doctor.profile_photo.data)}` : null
+          }));
+          setDoctors(doctorsWithImages);
         } else {
-          setDoctors([]); // Ensure doctors is always an array
+          setDoctors([]);
           setError('Invalid data format received');
         }
       } catch (error) {
@@ -78,8 +87,19 @@ const doctorImages = {
     fetchDoctors();
   }, []);
 
+
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
+
   const filteredDoctors = selectedSpecialty
-    ? doctors.filter(doctor => doctor.speciality === selectedSpecialty)
+    ? doctors.filter(doctor => doctor.Speciality === selectedSpecialty)
     : doctors;
 
   if (loading) return <div>Loading...</div>;
@@ -129,21 +149,32 @@ const doctorImages = {
   {filteredDoctors.map((doctor) => (
     <Card key={doctor.id} className="hover:shadow-lg transition-all">
       <CardContent className="p-6">
-        <img 
-          src={doctorImages[doctor.id] || doctorImages.doc1}
-          alt={doctor.Name1 || 'Doctor'}
-          className="w-full h-50 object-cover rounded-lg mb-4"
-        />
-        <h2 className="text-xl font-bold mb-2">{doctor.Name1}</h2>
-        <p className="text-gray-600 mb-2">{doctor.speciality}</p>
+      {doctor.imageUrl ? (
+                <img 
+                  src={doctor.imageUrl}
+                  alt={doctor.name1}
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                  <User className="h-20 w-20 text-gray-400" />
+                </div>
+              )}
+
+        <h2 className="text-xl font-bold mb-2">{doctor.name1}</h2>
+        <p className="text-gray-600 mb-2">{doctor.Speciality}</p>
         
         <div className="flex items-center gap-2 text-gray-600 mb-2">
           <GraduationCap className="h-4 w-4" />
-          <span>Experience: {doctor.experience}</span>
+          <span>Experience: {doctor.experience_years} years</span>
         </div>
         
+        <div className="flex items-center gap-2 text-gray-600 mb-4">
+                <Stethoscope className="h-4 w-4" />
+                <span>{doctor.hospital_name}</span>
+              </div>
         <button 
-      onClick={() => navigate(`/book/doc${doctor.id.substring(3)}`)}
+      onClick={() => navigate(`/book/${doctor.id}`)}
       className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4"
     >
       Book Appointment

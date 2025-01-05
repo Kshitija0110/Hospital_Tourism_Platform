@@ -39,7 +39,7 @@ pool.getConnection((err, connection) => {
 // Get all doctors
 app.get('/api/doctors', async (req, res) => {
   try {
-    const [rows] = await pool.promise().query('SELECT * FROM doctors');
+    const [rows] = await pool.promise().query('SELECT * FROM doc');
     res.json(rows);
     //console.log(rows);
   } catch (error) {
