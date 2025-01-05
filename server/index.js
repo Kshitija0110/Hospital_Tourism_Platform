@@ -349,6 +349,79 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 });
 
+// Doctor registration endpoint
+app.post('/api/doctor-signup', async (req, res) => {
+  const {
+    name,
+    email,
+    password,
+    phone,
+    gender,
+    speciality,
+    successStory,
+    certificates,
+    hospital,
+    experience
+
+  } = req.body;
+
+  try {
+    // Check if doctor already exists
+    const [existingDoctors] = await pool.promise().query(
+      'SELECT * FROM doc WHERE email = ?',
+      [email]
+    );
+
+    if (existingDoctors.length > 0) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Insert doctor data
+    const [result] = await pool.promise().query(
+      `INSERT INTO doc (
+        name1, 
+        email, 
+        password, 
+        phone_number, 
+        gender, 
+       Speciality, 
+        success_story,
+        certificates,
+        hospital_name,
+        experience_years
+      ) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        email,
+        password,
+        phone,
+        gender,
+        speciality,
+        successStory,
+        JSON.stringify(certificates),
+        hospital,
+        experience
+       // Store certificates as JSON
+      ]
+    );
+
+    // Also create login entry for the doctor
+    // await pool.promise().query(
+      // 'INSERT INTO login (name, email, password, user_type) VALUES (?, ?, ?, ?)',
+      // [name, email, password, 'doctor']
+    // );
+
+    res.status(201).json({
+      message: 'Doctor registered successfully',
+      doctorId: result.insertId
+    });
+
+  } catch (error) {
+    console.error('Error during doctor registration:', error);
+    res.status(500).json({ message: 'Database error during registration' });
+  }
+});
+
 
 const PORT = 3001;
 app.listen(PORT, () => {

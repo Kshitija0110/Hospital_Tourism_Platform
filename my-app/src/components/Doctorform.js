@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, User, Mail, Lock, Phone, Award, Calendar, Heart, FileText } from 'lucide-react';
+import { Upload,Hospital, User, Mail, Lock, Phone, Award, Calendar, Heart, FileText, Stethoscope } from 'lucide-react';
 
 const DoctorForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -12,7 +12,8 @@ const DoctorForm = ({ onSubmit }) => {
     department: '',
     experience: '',
     successStory: '',
-    certificates: []
+    certificates: [],
+    profile_photo: null
   });
 
   const [certificateFields, setCertificateFields] = useState([
@@ -65,20 +66,41 @@ const DoctorForm = ({ onSubmit }) => {
     ]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     const completeFormData = {
       ...formData,
       certificates: certificateFields
     };
-    onSubmit(completeFormData);
+    //onSubmit(completeFormData);
+    try {
+      const response = await fetch('http://localhost:3001/api/doctor-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(completeFormData)
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert('Doctor registration successful!');
+        // Clear form or redirect
+      } else {
+        alert(data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Error during doctor registration:', error);
+      alert('Registration failed. Please try again.');
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Doctor Registration Form</h2>
+      
       
       <form onSubmit={handleSubmit} className="space-y-6">
+
         {/* Basic Information */}
          {/* Name Field */}
          <div>
@@ -94,6 +116,7 @@ const DoctorForm = ({ onSubmit }) => {
               onChange={handleInputChange}
               className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               required
+              placeholder="Enter your full name"
             />
           </div>
         </div>
@@ -112,45 +135,10 @@ const DoctorForm = ({ onSubmit }) => {
               onChange={handleInputChange}
               className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               required
+              placeholder="Enter your email"
             />
           </div>
         </div>
-
-    
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -185,7 +173,7 @@ const DoctorForm = ({ onSubmit }) => {
               />
             </div>
           </div>
-        </div>
+        
 
         {/* Gender Selection */}
         <div>
@@ -218,6 +206,24 @@ const DoctorForm = ({ onSubmit }) => {
           </div>
         </div>
 
+
+        {/* Hospital name*/}
+        <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+         Hospital Name
+       </label>
+       <div className="relative">
+         <Hospital className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+         <input
+          type="name"
+          name="hospital"
+          value={formData.hospital}
+           onChange={handleInputChange}
+           className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          required
+           />
+        </div>
+      </div>
         {/* Professional Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -328,6 +334,51 @@ const DoctorForm = ({ onSubmit }) => {
             placeholder="Share your notable achievements and success stories..."
           />
         </div>
+
+
+        {/* Profile Photo Upload */}
+<div className="mt-6">
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Profile Photo
+  </label>
+  <div className="mt-1 flex items-center gap-4">
+    <div className="w-24 h-24 border-2 border-gray-300 rounded-full overflow-hidden">
+      {formData.profile_photo ? (
+        <img
+          src={URL.createObjectURL(formData.profile_photo)}
+          alt="Profile Preview"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <User className="h-12 w-12 text-gray-400" />
+        </div>
+      )}
+    </div>
+    <input
+      type="file"
+      name="profile_photo"
+      accept="image/*"
+      onChange={(e) => {
+        if (e.target.files?.[0]) {
+          setFormData(prev => ({
+            ...prev,
+            profile_photo: e.target.files[0]
+          }));
+        }
+      }}
+      className="block w-full text-sm text-gray-500
+        file:mr-4 file:py-2 file:px-4
+        file:rounded-full file:border-0
+        file:text-sm file:font-semibold
+        file:bg-blue-50 file:text-blue-700
+        hover:file:bg-blue-100"
+    />
+  </div>
+  <p className="mt-2 text-sm text-gray-500">
+    Upload a professional photo. JPG, PNG up to 5MB
+  </p>
+</div>
 
         {/* Submit Button */}
         <button

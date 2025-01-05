@@ -124,14 +124,6 @@ const procedureImages = {
   };
   
   const handleGoogleSignIn = async () => {
-    // try {
-      // await signInWithGoogle();
-      // setShowAuthModal(false);
-      //Handle successful Google sign-in
-    // } catch (error) {
-      // console.error('Google sign-in error:', error);
-      // alert('Google sign-in failed');
-    // }
     try {
       const result = await signInWithGoogle();
       if (result) {
@@ -426,9 +418,10 @@ const procedureImages = {
 {showAuthModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
     <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div className="bg-white rounded-lg p-8 max-w-md w-full">
-      <div className="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 z-10">
-        <h2 className="text-2xl font-bold">
+    <div className="bg-white rounded-lg p-8 max-w-md w-full  max-h-[90vh] overflow-y-auto">
+
+      <div className="flex justify-between items-center mb-6 top-0 bg-white pb-4">
+        <h2 className="text-2xl font-bold text-center flex-grow">
           {isLogin ? 'Sign In' : 'Create Account'}
         </h2>
         <button 
@@ -476,6 +469,8 @@ const procedureImages = {
           </div>
         </div>
       )}
+
+      <div className="overflow-y-auto">
       {userType && (
         userType === 'doctor' ? (
           <DoctorForm onSubmit={handleDoctorSubmit} />
@@ -557,6 +552,7 @@ const procedureImages = {
       </form>
       ))}
     </div>
+  </div>
   </div>
   </div>
 )}
