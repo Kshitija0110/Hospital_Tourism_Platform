@@ -3,12 +3,13 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const axios = require('axios');
 const stripe = require('stripe')('sk_test_51PuIv9Rt4bZZiTQmr0U87nNDcUzmGBTfWchvytdyubaejLVPoThw4F4M9AyPL475JkrNz6WAUAcp9CK0lUvcWO4G00ZAXydEPe');
-
+const multer = require('multer');
 require('dotenv').config();
-
+const upload = multer();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // AWS RDS MySQL connection
 const pool = mysql.createPool({
@@ -350,7 +351,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
 });
 
 // Doctor registration endpoint
-app.post('/api/doctor-signup', async (req, res) => {
+app.post('/api/doctor-signup', upload.single('profile_photo'),async (req, res) => {
   const {
     name,
     email,
@@ -365,6 +366,25 @@ app.post('/api/doctor-signup', async (req, res) => {
 
   } = req.body;
 
+  // Log the received data for debugging
+  console.log('Received data:', {
+    name,
+    email,
+    password,
+    phone,
+    gender,
+    speciality,
+    hospital,
+    experience
+  });
+  if (!name || !email || !password || !phone || !gender || !speciality || !hospital) {
+    return res.status(400).json({ 
+      message: 'Missing required fields',
+      receivedData: req.body 
+    });
+  }
+
+ 
   try {
     // Check if doctor already exists
     const [existingDoctors] = await pool.promise().query(
@@ -375,6 +395,7 @@ app.post('/api/doctor-signup', async (req, res) => {
     if (existingDoctors.length > 0) {
       return res.status(400).json({ message: 'Email already registered' });
     }
+    const profile_photo = req.file ? req.file.buffer : null;
 
     // Insert doctor data
     const [result] = await pool.promise().query(
@@ -388,8 +409,9 @@ app.post('/api/doctor-signup', async (req, res) => {
         success_story,
         certificates,
         hospital_name,
+        profile_photo,
         experience_years
-      ) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
       [
         name,
         email,
@@ -397,10 +419,11 @@ app.post('/api/doctor-signup', async (req, res) => {
         phone,
         gender,
         speciality,
-        successStory,
-        JSON.stringify(certificates),
+        successStory|| '',
+        certificates ? JSON.stringify(certificates) : '[]',
         hospital,
-        experience
+        profile_photo,
+        experience || '0'
        // Store certificates as JSON
       ]
     );

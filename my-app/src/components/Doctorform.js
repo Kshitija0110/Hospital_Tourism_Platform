@@ -68,18 +68,30 @@ const DoctorForm = ({ onSubmit }) => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    const completeFormData = {
-      ...formData,
-      certificates: certificateFields
-    };
-    //onSubmit(completeFormData);
     try {
+      // Create FormData object to handle file upload
+      const formDataToSend = new FormData();
+      
+      // Append all text fields
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('gender', formData.gender);
+      formDataToSend.append('speciality', formData.speciality);
+      formDataToSend.append('hospital', formData.hospital);
+      formDataToSend.append('experience', formData.experience);
+      formDataToSend.append('successStory', formData.successStory);
+      formDataToSend.append('certificates', JSON.stringify(certificateFields));
+  
+      // Append profile photo if exists
+      if (formData.profile_photo) {
+        formDataToSend.append('profile_photo', formData.profile_photo);
+      }
+  
       const response = await fetch('http://localhost:3001/api/doctor-signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(completeFormData)
+        body: formDataToSend // Send as FormData instead of JSON
       });
   
       const data = await response.json();
@@ -94,6 +106,7 @@ const DoctorForm = ({ onSubmit }) => {
       alert('Registration failed. Please try again.');
     }
   };
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg rounded-lg">
@@ -358,12 +371,17 @@ const DoctorForm = ({ onSubmit }) => {
     <input
       type="file"
       name="profile_photo"
-      accept="image/*"
+      accept="image/jpeg,image/png,image/jpg"
       onChange={(e) => {
         if (e.target.files?.[0]) {
+          const file = e.target.files[0];
+          if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            alert('File size should be less than 5MB');
+            return;
+          }
           setFormData(prev => ({
             ...prev,
-            profile_photo: e.target.files[0]
+            profile_photo: file
           }));
         }
       }}
