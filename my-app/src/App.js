@@ -8,7 +8,7 @@ import HospitalsList from './components/HospitalsList';
 import Success from './components/Success';
 import Cancel from './components/Cancel';
 import { AuthProvider } from './context/AuthContext';
-
+import AdminHome from './components/AdminHome';
 function App() {
   return (
     <AuthProvider>
@@ -21,6 +21,7 @@ function App() {
       <Route path="/hospitals" element={<HospitalsList />} />
       <Route path="/success" element={<Success />} />
       <Route path="/cancel" element={<Cancel />} />
+      <Route path="/adminhome" element={<AdminHome />} /> 
     </Routes>
   </Router>
   </AuthProvider>

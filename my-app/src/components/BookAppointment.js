@@ -136,13 +136,13 @@ const [bookingId, setBookingId] = useState(null);
   if (loading || !doctor) return <div>Loading...</div>;
   const makePayment = async () => {
     const stripe = await loadStripe('pk_test_51PuIv9Rt4bZZiTQmbMvH1ZRG2w26Pl6vhQfqxjTuX1DsDfM190vQVOW19uxP474IhAkuGeSZt5PVOZM3ui1ZbK0G002M2Bu3bm');
-    
+    const fees = Math.round(parseFloat(doctor?.Consultation_Fee) * 100);
     const body = {
       products: [
         {
           name: doctor.Name1, // Doctor's name
           description: doctor.speciality, // Doctor's specialty
-          amount: doctor.fees * 100, // Convert fees from rupees to paise
+          amount: fees, // Convert fees from rupees to paise
           currency: 'inr', // Currency for the payment (Indian Rupees)
         },
       ],
@@ -158,8 +158,26 @@ const [bookingId, setBookingId] = useState(null);
     try {
       const response = await fetch('http://localhost:3001/api/create-checkout-session', {
         method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              price_data: {
+                currency: 'inr',
+                product_data: {
+                  name: `Consultation with Dr. ${doctor?.name1}`,
+                  description: `Appointment on ${selectedDate} at ${selectedTime}`
+                },
+                unit_amount: fees,
+              },
+              quantity: 1
+            }
+          ],
+          email: user.email,
+          bookingId
+        }),
       });
     
       if (response.ok) {

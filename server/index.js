@@ -179,6 +179,19 @@ app.get('/api/hospitals/:state', async (req, res) => {
   }
 });
 
+app.get('/api/hospitals', async (req, res) => {
+  try {
+    const [rows] = await pool.promise().query('SELECT * FROM hospital_table');
+    res.json(rows);
+    // Uncomment below to debug and view the data in your terminal
+    // console.log(rows);
+  } catch (error) {
+    console.error('Error fetching hospitals:', error);
+    res.status(500).json({ error: 'Error fetching hospitals' });
+  }
+});
+
+
 
 // Sign Up Route
 app.post('/auth/signup', async (req, res) => {
@@ -342,7 +355,7 @@ app.post('/auth/google', async (req, res) => {
   }
 });
 
-app.post('/api/create-checkout-session', async (req, res) => {
+/*app.post('/api/create-checkout-session', async (req, res) => {
   const { products, appointment_date, appointment_time, patient_name } = req.body;
 
   if (!products || products.length === 0) {
@@ -379,6 +392,54 @@ app.post('/api/create-checkout-session', async (req, res) => {
   } catch (error) {
     console.error('Error creating checkout session:', error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});*/
+
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const { items, email, bookingId } = req.body;
+
+    const lineItems = items.map(item => ({
+      price_data: {
+        currency: 'inr',
+        product_data: {
+          name: item.name,
+          description: item.description || 'Medical Consultation'
+        },
+        unit_amount: item.price_data.unit_amount,
+      },
+      quantity: item.quantity
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: 'http://localhost:3002/success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'http://localhost:3002/cancel',
+      customer_email: email,
+      metadata: {
+        bookingId: bookingId.toString(),
+        customerEmail: email
+      },
+      payment_intent_data: {
+        metadata: {
+          bookingId: bookingId.toString()
+        }
+      }
+    });
+
+    res.json({ 
+      url: session.url,
+      sessionId: session.id 
+    });
+
+  } catch (error) {
+    console.error('Stripe error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.stack 
+    });
   }
 });
 

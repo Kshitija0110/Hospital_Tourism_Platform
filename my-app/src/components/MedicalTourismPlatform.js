@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useState,useEffect } from 'react';
-import { Search, MapPin, Calendar,Phone,Linkedin,Twitter,Instagram, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
+import { Search,  Lock,MapPin, Calendar,Phone,Linkedin,Twitter,Instagram, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
 import doctorPatientImage from '../assets/p.jpg';
@@ -14,7 +14,7 @@ import patientIcon from '../assets/patient logo.png';
 import DoctorForm from '../components/Doctorform.js';
 import googleIcon from '../assets/googleIcon.png';
 import { auth, signInWithGoogle } from '../firebase';
-import { Mail, Lock } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 const MedicalTourismPlatform = () => {
   const navigate = useNavigate();
@@ -326,6 +326,14 @@ const procedureImages = {
     <Plus className="h-5 w-5" />
     Book Consultation
   </button>
+
+  <button 
+   onClick={() => navigate('/adminhome')} 
+   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+ >
+   <Lock className="h-5 w-5" />
+   Admin
+ </button>
 </div>
   </div>
   
