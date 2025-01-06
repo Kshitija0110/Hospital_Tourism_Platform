@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { useNavigate } from 'react-router-dom';
+import {Hospital} from 'lucide-react';
 
 
 const AdminHome = () => {
@@ -14,7 +15,7 @@ const navigate = useNavigate();
 useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/hospitals');
+        const response = await fetch('http://localhost:3001/api/hospitals1');
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -41,15 +42,25 @@ useEffect(() => {
     navigate('/add-hospital');
   };
 
+  const arrayBufferToBase64 = (buffer) => {
+    if (!buffer) return '';
+    try {
+      const binary = Array.from(new Uint8Array(buffer))
+        .map(b => String.fromCharCode(b))
+        .join('');
+      return btoa(binary);
+    } catch (error) {
+      console.error('Error converting image:', error);
+      return '';
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
-          <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-xl text-gray-600">Manage Hospitals and Their Details</p>
-          </div>
           {loading ? (
           <div className="text-center">Loading hospitals...</div>
         ) : error ? (
@@ -57,10 +68,24 @@ useEffect(() => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {hospitals.map((hospital) => (
-              <Card key={hospital.id} className="hover:shadow-lg transition-all flex flex-col justify-between h-full">
-                <CardContent className="p-6 flex flex-col flex-grow">
-                  <h2 className="text-xl font-bold mb-2">{hospital.hospital_name}</h2>
-                  <p className="text-gray-600 mb-2">
+              <Card key={hospital.id} className="hover:shadow-lg transition-all flex flex-col justify-between h-full relative overflow-hidden">
+                {/* Image at top of card */}
+    {hospital.image ? (
+      <div className="w-full h-48 relative">
+        <img
+          src={`data:image/png;base64,${arrayBufferToBase64(hospital.image)}`}
+          alt={hospital.hospital_name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    ) : (
+      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+        <Hospital className="h-16 w-16 text-gray-400" />
+      </div>
+    )}
+                <CardContent className="p-6 flex flex-col flex-grow relative z-10 bg-white/60 backdrop-blur-sm">
+                  <h2 className="text-xl font-bold mb-2 text-gray-900">{hospital.hospital_name}</h2>
+                  <p className="text-gray-600 mb-2 font-medium">
                     <strong>Address:</strong> {hospital.address}
                   </p>
                   <p className="text-gray-600 mb-2">
@@ -69,7 +94,7 @@ useEffect(() => {
                   <p className="text-gray-600 flex-grow">{hospital.description}</p>
                   <div className="flex gap-2 mt-4">
                     <button
-                      onClick={() => navigate(`/edit-hospital/${hospital.id}`)}
+                      onClick={() => navigate(`/hospital-details/${hospital.id}`)}
                       className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
                       View Details
@@ -84,7 +109,7 @@ useEffect(() => {
         {/* Add New Hospital Button */}
         <div className="mt-8 flex justify-center">
           <button
-            onClick={() => {/* Add new hospital functionality */}}
+            onClick={() => navigate('/add-hospital')} 
             className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
           >
             Add New Hospital

@@ -179,15 +179,89 @@ app.get('/api/hospitals/:state', async (req, res) => {
   }
 });
 
-app.get('/api/hospitals', async (req, res) => {
+// Get hospital details by ID
+app.get('/api/hospitals1/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.promise().query(
+      'SELECT * FROM hospital_table WHERE id = ?',
+      [req.params.id]
+    );
+    
+    if (rows.length > 0) {
+      const hospital = rows[0];
+      
+      // Convert image data for proper display
+      if (hospital.image) {
+        // Handle multiple images if stored as array or concatenated blobs
+        const images = hospital.image;
+        hospital.imageData = images.toString('base64');
+      }
+     res.json(hospital);
+    } 
+    else {
+      res.status(404).json({ error: 'Hospital not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching hospital details:', error);
+    res.status(500).json({ error: 'Error fetching hospital details' });
+  }
+});
+
+app.get('/api/hospitals1', async (req, res) => {
   try {
     const [rows] = await pool.promise().query('SELECT * FROM hospital_table');
-    res.json(rows);
-    // Uncomment below to debug and view the data in your terminal
-    // console.log(rows);
+    
+    // Convert BLOB images to base64
+    const hospitalsWithImages = rows.map(hospital => ({
+      ...hospital,
+      image: hospital.image ? hospital.image.toString('base64') : null
+    }));
+
+    // Send single response with converted data
+    res.json(hospitalsWithImages);
+
   } catch (error) {
     console.error('Error fetching hospitals:', error);
     res.status(500).json({ error: 'Error fetching hospitals' });
+  }
+  });
+
+app.post('/api/hospitals', upload.array('images'), async (req, res) => {
+  try {
+    const { hospital_name, address, speciality, description } = req.body;
+    const images = req.files ? req.files[0].buffer : null; // Get first image for now
+
+    // Validate required fields
+    if (!hospital_name || !address || !speciality) {
+      return res.status(400).json({ message: 'Required fields missing' });
+    }
+
+    // Insert hospital data
+    const [result] = await pool.promise().query(
+      `INSERT INTO hospital_table (
+        hospital_name,
+        address,
+        speciality,
+        description,
+        image
+      ) VALUES (?, ?, ?, ?, ?)`,
+      [
+        hospital_name,
+        address,
+        speciality,
+        description,
+        images
+      ]
+    );
+
+    res.status(201).json({
+      message: 'Hospital added successfully',
+      hospitalId: result.insertId
+    });
+
+  } catch (error) {
+    console.error('Error adding hospital:', error);
+    res.status(500).json({ message: 'Error adding hospital' });
   }
 });
 

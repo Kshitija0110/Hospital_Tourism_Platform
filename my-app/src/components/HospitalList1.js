@@ -11,7 +11,7 @@ const HospitalList = () => {
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/hospitals');
+        const response = await fetch('http://localhost:3001/api/hospitals1');
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
