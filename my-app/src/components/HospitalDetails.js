@@ -61,7 +61,7 @@ const HospitalDetails = () => {
       <div>
         <h2 className="text-xl font-bold mb-4">Hospital Image</h2>
         {hospital.imageData ? (
-          <div className="w-full">
+      
             <img
               src={`data:image/jpeg;base64,${hospital.imageData}`}
               alt={hospital.hospital_name}
@@ -73,7 +73,7 @@ const HospitalDetails = () => {
                 backgroundColor: 'rgb(249, 250, 251)' 
               }}
             />
-          </div>
+      
         ) : (
           <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
             <Hospital className="h-16 w-16 text-gray-400" />

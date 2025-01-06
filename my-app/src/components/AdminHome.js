@@ -34,12 +34,25 @@ useEffect(() => {
     fetchHospitals();
   }, []);
 
-  const handleDelete = async (id) => {
-    // Add delete functionality
-    console.log('Delete hospital:', id);
-  };
-  const handleAddNew = () => {
-    navigate('/add-hospital');
+  const handleDeleteHospital = async (id) => {
+    if (window.confirm('Are you sure you want to delete this hospital?')) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/hospitals1/${id}`, {
+          method: 'DELETE',
+        });
+  
+        if (response.ok) {
+          // Remove the deleted hospital from state
+          setHospitals(hospitals.filter(hospital => hospital.id !== id));
+          alert('Hospital deleted successfully');
+        } else {
+          alert('Failed to delete hospital');
+        }
+      } catch (error) {
+        console.error('Error deleting hospital:', error);
+        alert('Error deleting hospital');
+      }
+    }
   };
 
   const arrayBufferToBase64 = (buffer) => {
@@ -70,20 +83,24 @@ useEffect(() => {
             {hospitals.map((hospital) => (
               <Card key={hospital.id} className="hover:shadow-lg transition-all flex flex-col justify-between h-full relative overflow-hidden">
                 {/* Image at top of card */}
-    {hospital.image ? (
-      <div className="w-full h-48 relative">
-        <img
-          src={`data:image/png;base64,${arrayBufferToBase64(hospital.image)}`}
-          alt={hospital.hospital_name}
-          className="w-full h-full object-cover"
-        />
+                <div className="w-full h-60">
+        {hospital.imageData ? (
+          <img
+            src={`data:image/jpeg;base64,${hospital.imageData}`}
+            alt={hospital.hospital_name}
+            className="w-full h-full object-cover object-top"
+            style={{
+              backgroundColor: 'rgb(249, 250, 251)'
+            }}
+          />
+        ) : (
+          <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+            <Hospital className="h-16 w-16 text-gray-400" />
+          </div>
+        )}
       </div>
-    ) : (
-      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-        <Hospital className="h-16 w-16 text-gray-400" />
-      </div>
-    )}
-                <CardContent className="p-6 flex flex-col flex-grow relative z-10 bg-white/60 backdrop-blur-sm">
+    
+    <CardContent className="p-6 flex flex-col flex-grow relative z-10 bg-white/60 backdrop-blur-sm">
                   <h2 className="text-xl font-bold mb-2 text-gray-900">{hospital.hospital_name}</h2>
                   <p className="text-gray-600 mb-2 font-medium">
                     <strong>Address:</strong> {hospital.address}
@@ -99,6 +116,20 @@ useEffect(() => {
                     >
                       View Details
                     </button>
+                    <button
+                      onClick={() => navigate(`/hospital-doctors/${hospital.id}`)}
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                      >
+                       View doctors
+                       </button>
+                  </div>
+                  <div>
+                  <button
+                   onClick={() => handleDeleteHospital(hospital.id)}
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4 gap-3 mb-3"
+                    >
+                  Delete
+                 </button>
                   </div>
                 </CardContent>
               </Card>

@@ -212,19 +212,61 @@ app.get('/api/hospitals1', async (req, res) => {
     const [rows] = await pool.promise().query('SELECT * FROM hospital_table');
     
     // Convert BLOB images to base64
-    const hospitalsWithImages = rows.map(hospital => ({
-      ...hospital,
-      image: hospital.image ? hospital.image.toString('base64') : null
-    }));
+    const hospitalsWithImages = rows.map(hospital => {
+      if (hospital.image) {
+        // Use the same conversion logic as single hospital endpoint
+        const images = hospital.image;
+        hospital.imageData = images.toString('base64');
+      }
+      return hospital;
+    });
 
-    // Send single response with converted data
     res.json(hospitalsWithImages);
-
   } catch (error) {
     console.error('Error fetching hospitals:', error);
     res.status(500).json({ error: 'Error fetching hospitals' });
   }
-  });
+});
+// Delete hospital by ID
+app.delete('/api/hospitals1/:id', async (req, res) => {
+  try {
+    const [result] = await pool.promise().query(
+      'DELETE FROM hospital_table WHERE id = ?',
+      [req.params.id]
+    );
+    
+    if (result.affectedRows > 0) {
+      res.json({ message: 'Hospital deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Hospital not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting hospital:', error);
+    res.status(500).json({ error: 'Error deleting hospital' });
+  }
+});
+
+/*app.get('/api/hospitals1', async (req, res) => {
+  try {
+    const [rows] = await pool.promise().query('SELECT * FROM hospital_table');
+    
+    // Convert BLOB images to base64
+    const hospitalsWithImages = rows.map(hospital => {
+      // Convert the LONGBLOB image data to base64 if exists
+      const base64Image = hospital.image ? hospital.image.toString('base64') : null;
+      
+      return {
+        ...hospital,
+        image: base64Image // Send the base64 string directly
+      };
+    });
+
+    res.json(hospitalsWithImages);
+  } catch (error) {
+    console.error('Error fetching hospitals:', error);
+    res.status(500).json({ error: 'Error fetching hospitals' });
+  }
+   });*/
 
 app.post('/api/hospitals', upload.array('images'), async (req, res) => {
   try {
