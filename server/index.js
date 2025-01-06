@@ -246,6 +246,23 @@ app.delete('/api/hospitals1/:id', async (req, res) => {
   }
 });
 
+// Get doctors by hospital name
+app.get('/api/hospital-doctors/:hospitalName', async (req, res) => {
+  try {
+    const hospitalName = decodeURIComponent(req.params.hospitalName);
+    console.log('Fetching doctors for hospital:', hospitalName); // Debug log
+    const [rows] = await pool.promise().query(
+      'SELECT * FROM doc WHERE hospital_name = ?',
+      [hospitalName]
+    );
+    console.log('Found doctors:', rows); // Debug log
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching hospital doctors:', error);
+    res.status(500).json({ error: 'Error fetching hospital doctors' });
+  }
+});
+
 /*app.get('/api/hospitals1', async (req, res) => {
   try {
     const [rows] = await pool.promise().query('SELECT * FROM hospital_table');

@@ -11,6 +11,7 @@ import { AuthProvider } from './context/AuthContext';
 import AdminHome from './components/AdminHome';
 import AddHospital from './components/AddHospital';
 import HospitalDetails from './components/HospitalDetails';
+import HospitalDoctors from './components/HospitalDoctors';
 function App() {
   return (
     <AuthProvider>
@@ -26,6 +27,7 @@ function App() {
       <Route path="/adminhome" element={<AdminHome />} /> 
       <Route path="/add-hospital" element={<AddHospital />} />
       <Route path="/hospital-details/:id" element={<HospitalDetails />} />
+      <Route path="/hospital-doctors/:id" element={<HospitalDoctors />} />
     </Routes>
   </Router>
   </AuthProvider>
