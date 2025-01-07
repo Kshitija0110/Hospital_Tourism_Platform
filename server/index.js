@@ -1,4 +1,58 @@
-const express = require('express');
+// No code was selected, so I will provide a general improvement to the code
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+// Add rate limiting middleware
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
+// Add helmet middleware for security
+const helmet = require('helmet');
+app.use(helmet());
+
+// Add morgan middleware for logging
+const morgan = require('morgan');
+app.use(morgan('combined'));
+
+// Add cors middleware with options
+app.use(cors({
+  origin: 'http://localhost:3002',
+  credentials: true
+}));
+
+// Add authentication middleware
+const authenticate = async (req, res, next) => {
+  const token = req.header('Authorization');
+  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (ex) {
+    res.status(400).json({ error: 'Invalid token.' });
+  }
+};
+
+// Use authentication middleware for protected routes
+app.use('/api/protected', authenticate);
+
+// Add validation middleware
+const validate = (req, res, next) => {
+  const { error } = validateInput(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+  next();
+};
+
+// Use validation middleware for routes that require validation
+app.use('/api/validation', validate);const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const axios = require('axios');
@@ -116,6 +170,25 @@ app.delete('/api/appointments/:id', async (req, res) => {
   } catch (error) {
     console.error('Error cancelling appointment:', error);
     res.status(500).json({ error: 'Error cancelling appointment' });
+  }
+});
+
+// Mark appointment as complete
+app.put('/api/appointments/:id/complete', async (req, res) => {
+  try {
+    const [result] = await pool.promise().query(
+      'UPDATE appointments SET status = ? WHERE appointment_id = ?',
+      ['completed', req.params.id]
+    );
+    
+    if (result.affectedRows > 0) {
+      res.json({ message: 'Appointment marked as completed' });
+    } else {
+      res.status(404).json({ error: 'Appointment not found' });
+    }
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+    res.status(500).json({ error: 'Error updating appointment' });
   }
 });
 
@@ -338,33 +411,55 @@ app.post('/auth/signup', async (req, res) => {
 });
 
 // Login Route
+// Login Route
 app.post('/auth/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, userType } = req.body; // Add userType to destructuring
 
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
-    const [users] = await pool.promise().query(
-      'SELECT * FROM login WHERE email = ? AND password = ?',
-      [email, password]
-    );
+    // Check if logging in as doctor
+    if (userType === 'doctor') {
+      const [doctors] = await pool.promise().query(
+        'SELECT * FROM doc WHERE email = ? AND password = ?',
+        [email, password]
+      );
 
-    if (users.length > 0) {
-      
-      res.json({ 
-        message: 'Login successful',
-       
-        user: {
-          id: users[0].id,
-          name: users[0].name,
-          email: users[0].email
-        }
-      });
-      
+      if (doctors.length > 0) {
+        res.json({ 
+          message: 'Login successful',
+          user: {
+            id: doctors[0].id,
+            name: doctors[0].name1,
+            email: doctors[0].email,
+            userType: 'doctor'
+          }
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid doctor credentials' });
+      }
     } else {
-      res.status(401).json({ message: 'Invalid credentials. Please sign up first' });
+      // Patient login logic
+      const [users] = await pool.promise().query(
+        'SELECT * FROM login WHERE email = ? AND password = ?',
+        [email, password]
+      );
+
+      if (users.length > 0) {
+        res.json({ 
+          message: 'Login successful',
+          user: {
+            id: users[0].id,
+            name: users[0].name,
+            email: users[0].email,
+            userType: 'patient'
+          }
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
     }
   } catch (error) {
     console.error('Error during login:', error);
@@ -372,41 +467,44 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// app.post('/auth/google', async (req, res) => {
-  // const { name, email } = req.body;
-// 
-  // if (!name || !email) {
-    // return res.status(400).json({ message: 'Name and email are required' });
-  // }
-// 
-  // try {
+
+// Get doctor profile
+app.get('/api/doctor-profile/:email', async (req, res) => {
+  try {
+    console.log('Fetching doctor profile:', req.params.email);
+    const [rows] = await pool.promise().query(
+      'SELECT * FROM doc WHERE email = ?',
+      [req.params.email]
+    );
     
-    // const [existingUsers] = await pool.promise().query(
-      // 'SELECT * FROM login WHERE email = ?',
-      // [email]
-    // );
-// 
-    // if (existingUsers.length === 0) {
-      
-      // await pool.promise().query(
-        // 'INSERT INTO login (name, email, auth_provider) VALUES (?, ?, "google")',
-        // [name, email]
-      // );
-    // }
-// 
-    
-    // res.json({ 
-      // message: 'Google sign in successful',
-      // user: {
-        // name,
-        // email
-      // }
-    // });
-  // } catch (error) {
-    // console.error('Error during Google sign in:', error);
-    // res.status(500).json({ message: 'Database error during Google sign in' });
-  // }
-// });
+    if (rows.length > 0) {
+      res.json(rows[0]);
+    } else {
+      res.status(404).json({ error: 'Doctor not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching doctor profile:', error);
+    res.status(500).json({ error: 'Error fetching doctor profile' });
+  }
+});
+
+// Get doctor appointments
+app.get('/api/doctor-appointments/:doctorId', async (req, res) => {
+  try {
+    const [rows] = await pool.promise().query(
+      `SELECT 
+        a.*
+      FROM appointments a
+      WHERE a.doctor_id = ?
+      ORDER BY a.appointment_date DESC, a.appointment_time DESC`,
+      [req.params.doctorId]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching doctor appointments:', error);
+    res.status(500).json({ error: 'Error fetching appointments' });
+  }
+});
 
 app.post('/auth/google', async (req, res) => {
   const { name, email, userType } = req.body;

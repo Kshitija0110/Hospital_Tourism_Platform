@@ -21,6 +21,17 @@ import doc7 from '../assets/doc7.png';
 import doc8 from '../assets/doc8.png';
 import doc9 from '../assets/doc9.png';
 import doc10 from '../assets/doc10.png';
+import generalMedicineIcon from '../assets/physcian.png';
+import gynecologyIcon from '../assets/gynac.png';
+import pediatricsIcon from '../assets/pediatrics.png';
+import neurologyIcon from '../assets/neuro.png';
+import cardiologyIcon from '../assets/cardio.png';
+import dermatologyIcon from '../assets/derma.png';
+import orthopedicsIcon from '../assets/ortho.png';
+import oncologyIcon from '../assets/onco.png';
+import ophthalmologyIcon from '../assets/opthal.png';
+import entIcon from '../assets/ENT.png';
+
 
 
 const DoctorsList = () => {
@@ -31,19 +42,19 @@ const DoctorsList = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
 
   const specialties = [
-    { name: 'General Medicine', icon: Stethoscope },
-    { name: 'Gynecology', icon: User },
-    { name: 'Pediatrics', icon: Baby },
-    { name: 'Neurology', icon: Brain },
-    { name: 'Cardiology', icon: Heart },
-    { name: 'Dermatology', icon: Smile },
-    { name: 'Orthopedics', icon: Smile },
-    { name: 'Oncology', icon: Smile },
-    { name: 'Ophthalmology', icon: Smile },
-    { name: 'ENT', icon: Smile },
-
+    { name: 'General Medicine', icon: generalMedicineIcon },
+    { name: 'Gynecology', icon: gynecologyIcon },
+    { name: 'Pediatrics', icon: pediatricsIcon },
+    { name: 'Neurology', icon: neurologyIcon },
+    { name: 'Cardiology', icon: cardiologyIcon },
+    { name: 'Dermatology', icon: dermatologyIcon },
+    { name: 'Orthopedics', icon: orthopedicsIcon },
+    { name: 'Oncology', icon: oncologyIcon },
+    { name: 'Ophthalmology', icon: ophthalmologyIcon },
+    { name: 'ENT', icon: entIcon },
   ];
 
+ 
 // Create an image map
 const doctorImages = {
   'doc1': doc1,
@@ -125,7 +136,7 @@ const doctorImages = {
         </div>
         
         {specialties.map((specialty) => {
-          const Icon = specialty.icon;
+          //const Icon = specialty.icon;
           return (
             <div
               key={specialty.name}
@@ -135,7 +146,7 @@ const doctorImages = {
               }`}
             >
               <div className="w-16 h-16 rounded-full border-2 flex items-center justify-center mb-2 hover:border-blue-600">
-                <Icon className="w-8 h-8" />
+                <img src={specialty.icon} alt={specialty.name} className="w-11 h-11" />
               </div>
               <span className="text-sm whitespace-nowrap">{specialty.name}</span>
             </div>

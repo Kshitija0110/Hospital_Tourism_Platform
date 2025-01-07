@@ -100,6 +100,7 @@ const procedureImages = {
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Submitting auth with:', { ...authData, userType }); // Debug log
       const response = await fetch(`http://localhost:3001/auth/${isLogin ? 'login' : 'signup'}`, {
         method: 'POST',
         headers: {
@@ -118,6 +119,9 @@ const procedureImages = {
           setRegistrationStage('signup');
         } else {
           login(data.user);
+          if (userType === 'doctor') {
+            navigate('/doctor-dashboard');
+          }
           setShowAuthModal(false);
           alert(data.message);
         }
@@ -130,26 +134,6 @@ const procedureImages = {
     }
   };
   
-  // const handleGoogleSignIn = async () => {
-    // try {
-      // const result = await signInWithGoogle();
-      // if (result) {
-      
-        // const userData = {
-          // name: result.user.displayName,
-          // email: result.user.email
-        // };
-        // login(userData); // Use the login function from context
-        // setShowAuthModal(false);
-        // alert('Successfully signed in with Google!');
-      // 
-      // 
-      // }
-    // } catch (error) {
-      // console.error('Google sign-in error:', error);
-      // alert('Failed to sign in with Google. Please try again.');
-    // }
-  // };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -173,6 +157,9 @@ const procedureImages = {
         const data = await response.json();
         if (response.ok) {
           login(data.user);
+          if (userType === 'doctor') {
+            navigate('/doctor-dashboard');
+          }
           setShowAuthModal(false);
           alert('Successfully signed in with Google!');
         } else {
@@ -368,9 +355,7 @@ const procedureImages = {
             className="w-full h-[-150%] object-cover"
           />
         </div>
-
-       
-      </div>
+   </div>
 
 
 

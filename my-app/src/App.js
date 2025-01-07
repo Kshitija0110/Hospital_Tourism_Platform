@@ -12,9 +12,13 @@ import AdminHome from './components/AdminHome';
 import AddHospital from './components/AddHospital';
 import HospitalDetails from './components/HospitalDetails';
 import HospitalDoctors from './components/HospitalDoctors';
+
 import HospitalList1 from './components/HospitalList1';
 import HospitalDetailsUser from './components/HospitalDetailsUser';
 import HospitalDoctorsUser from './components/HospitalDoctorsUser';
+
+import DoctorDashboard from './components/DoctorDashboard';
+
 function App() {
   return (
     <AuthProvider>
@@ -31,9 +35,13 @@ function App() {
       <Route path="/add-hospital" element={<AddHospital />} />
       <Route path="/hospital-details/:id" element={<HospitalDetails />} />
       <Route path="/hospital-doctors/:id" element={<HospitalDoctors />} />
+
       <Route path="/hospitals" element={<HospitalList1 />} />
       <Route path="/hospital-details-user/:id" element={<HospitalDetailsUser />} />
       <Route path="/hospital-doctors-user/:id" element={<HospitalDoctorsUser />} />
+
+      <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+
     </Routes>
   </Router>
   </AuthProvider>
