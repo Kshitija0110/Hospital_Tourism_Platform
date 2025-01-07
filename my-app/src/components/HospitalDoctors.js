@@ -42,9 +42,10 @@ const HospitalDoctors = () => {
         console.log('Hospital data:', hospitalData); // Debug log
 
         // Then fetch doctors for this hospital
-        const doctorsResponse = await fetch(`http://localhost:3001/api/hospital-doctors/${encodeURIComponent(hospitalData.hospital_name)}`);
+        const doctorsResponse = await fetch(`http://localhost:3001/api/hospital-doctors/${(hospitalData.hospital_name)}`);
         if (!doctorsResponse.ok) throw new Error('Failed to fetch doctors');
         const doctorsData = await doctorsResponse.json();
+        console.log("Hospital is: ", hospitalData.hospital_name);
         console.log('Doctors data:', doctorsData); // Debug log
         setDoctors(doctorsData);
       } catch (error) {
@@ -70,11 +71,13 @@ const HospitalDoctors = () => {
 
   // Get unique specialties from doctors
   const specialties = [...new Set(doctors.map(doctor => doctor.Speciality))];
-
+  console.log("Available specialties:", specialties); // Debug log
   // Filter doctors by specialty
-  const filteredDoctors = selectedSpecialty === 'All'
-    ? doctors
-    : doctors.filter(doctor => doctor.Speciality === selectedSpecialty);;
+  const filteredDoctors = selectedSpecialty && selectedSpecialty !== 'All'
+  ? doctors.filter(doctor => doctor.Speciality === selectedSpecialty)
+  : doctors;
+
+console.log("Filtered doctors:", filteredDoctors); // Debug log
 
   if (loading) return <div className="text-center p-6">Loading...</div>;
   if (error) return <div className="text-center p-6 text-red-600">{error}</div>;
@@ -95,24 +98,35 @@ const HospitalDoctors = () => {
       </div>
 
       {/* Specialty Filter */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">Filter by Specialty</h2>
-        <div className="flex gap-4 overflow-x-auto py-2">
-        {allSpecialties.map(specialty => (
-            <button
-              key={specialty}
-              onClick={() => setSelectedSpecialty(specialty)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                selectedSpecialty === specialty
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
-              }`}
-            >
-              {specialty}
-            </button>
-          ))}
-      </div>
-      </div>
+      {/* Specialty Filter */}
+<div className="mb-8">
+  <h2 className="text-xl font-bold mb-4">Filter by Specialty</h2>
+  <div className="flex gap-4 overflow-x-auto py-2">
+    <button
+      onClick={() => setSelectedSpecialty('All')}
+      className={`px-4 py-2 rounded-lg transition-colors ${
+        !selectedSpecialty || selectedSpecialty === 'All'
+          ? 'bg-blue-600 text-white'
+          : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+      }`}
+    >
+      All Specialties
+    </button>
+    {specialties.map(specialty => (
+      <button
+        key={specialty}
+        onClick={() => setSelectedSpecialty(specialty)}
+        className={`px-4 py-2 rounded-lg transition-colors ${
+          selectedSpecialty === specialty
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+        }`}
+      >
+        {specialty}
+      </button>
+    ))}
+  </div>
+</div>
 
       {/* Doctors Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

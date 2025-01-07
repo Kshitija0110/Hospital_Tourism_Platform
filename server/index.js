@@ -131,10 +131,10 @@ app.get('/api/appointments', async (req, res) => {
         a.status,
         a.payment_status,
         a.patient_name,
-        d.Name1 as doctor_name,
-        d.speciality
+        d.name1 as doctor_name,
+        d.Speciality
       FROM appointments a 
-      JOIN doctors d ON a.doctor_id = d.id 
+      JOIN doc d ON a.doctor_id = d.id 
       WHERE a.patient_name = ?
       ORDER BY a.appointment_date DESC, a.appointment_time DESC 
 
@@ -250,6 +250,7 @@ app.delete('/api/hospitals1/:id', async (req, res) => {
 app.get('/api/hospital-doctors/:hospitalName', async (req, res) => {
   try {
     const hospitalName = decodeURIComponent(req.params.hospitalName);
+    console.log(hospitalName);
     console.log('Fetching doctors for hospital:', hospitalName); // Debug log
     const [rows] = await pool.promise().query(
       'SELECT * FROM doc WHERE hospital_name = ?',
@@ -262,28 +263,6 @@ app.get('/api/hospital-doctors/:hospitalName', async (req, res) => {
     res.status(500).json({ error: 'Error fetching hospital doctors' });
   }
 });
-
-/*app.get('/api/hospitals1', async (req, res) => {
-  try {
-    const [rows] = await pool.promise().query('SELECT * FROM hospital_table');
-    
-    // Convert BLOB images to base64
-    const hospitalsWithImages = rows.map(hospital => {
-      // Convert the LONGBLOB image data to base64 if exists
-      const base64Image = hospital.image ? hospital.image.toString('base64') : null;
-      
-      return {
-        ...hospital,
-        image: base64Image // Send the base64 string directly
-      };
-    });
-
-    res.json(hospitalsWithImages);
-  } catch (error) {
-    console.error('Error fetching hospitals:', error);
-    res.status(500).json({ error: 'Error fetching hospitals' });
-  }
-   });*/
 
 app.post('/api/hospitals', upload.array('images'), async (req, res) => {
   try {

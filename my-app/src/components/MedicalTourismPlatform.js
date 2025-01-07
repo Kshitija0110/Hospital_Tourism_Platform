@@ -340,36 +340,64 @@ const procedureImages = {
       
 
       {/* Hero Section */}
-<div className="relative h-[400px] rounded-2xl mb-8 mt-9 overflow-hidden mt-[100px] ">
-  {/* Left side with text */}
-  <div className="absolute left-0 inset-y-0 w-3/5 bg-blue-600 z-10">
-    <div className="p-8 h-full flex flex-col justify-center">
-      <h2 className="text-4xl font-bold mb-4 text-white">
-        Find Your Path to Better Health
-      </h2>
-      <p className="text-xl mb-6 text-white">
-        Access Premium Healthcare Worldwide
-      </p>
-    </div>
-  </div>
-  
-  {/* Diagonal divider */}
-  <div 
-    className="absolute inset-0 z-20"
-    style={{
-      clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 50% 100%)',
-      background: 'linear-gradient(rgba(37, 99, 235, 0.8), rgba(37, 99, 235, 0.6))'
-    }}
-  >
-    <img
-      src={doctorPatientImage}
-      alt="Doctor with Patient"
-      className="w-full h-[-150%] object-cover"
-    />
-  </div>
+      {/* Hero Section */}
+      <div className="relative h-[400px] rounded-2xl mb-8 mt-9 overflow-hidden mt-[100px]">
+        {/* Left side with text */}
+        <div className="absolute left-0 inset-y-0 w-3/5 bg-blue-600 z-10">
+          <div className="p-8 h-full flex flex-col justify-center">
+            <h2 className="text-4xl font-bold mb-4 text-white">
+              Find Your Path to Better Health
+            </h2>
+            <p className="text-xl mb-6 text-white">
+              Access Premium Healthcare Worldwide
+            </p>
+          </div>
+        </div>
 
-  {/* Search bar */}
-</div>
+        
+        <div
+          className="absolute inset-0 z-0"  
+          style={{
+            clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 50% 100%)',
+            background: 'linear-gradient(rgba(37, 99, 235, 0.8), rgba(37, 99, 235, 0.6))'
+          }}
+        >
+          <img
+            src={doctorPatientImage}
+            alt="Doctor with Patient"
+            className="w-full h-[-150%] object-cover"
+          />
+        </div>
+
+       
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       {/* AI Recommendation */}
       <Alert className="mb-8 bg-green-50 border-green-200">

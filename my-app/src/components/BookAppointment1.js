@@ -85,36 +85,28 @@ const [bookingId, setBookingId] = useState(null);
       alert('Please select both date and time');
       return;
     }
-  
+
     try {
-      // Prepare the payload based on available data
-      const payload = {
-        doctor_id: doctorId,
-        appointment_date: selectedDate,
-        appointment_time: selectedTime,
-        patient_name: user ? user.name : 'Anonymous', // Fallback to 'Anonymous' if user is not available
-        // Exclude patient_email if user or user.email is not available
-        ...(user && user.email ? { patient_email: user.email } : {}),
-      };
-  
-      console.log('Booking payload:', payload);
-  
       const response = await fetch('http://localhost:3001/api/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          doctor_id: doctorId,
+          appointment_date: selectedDate,
+          appointment_time: selectedTime,
+          patient_email: user.email,
+          patient_name: user.name,
+        }),
       });
-  
-      const data = await response.json();
-      console.log('Backend response:', data);
-  
+
       if (response.ok) {
-        setBookingId(data.id);
-        return data.id;
+        const data = await response.json();
+      setBookingId(data.id);
+      return data.id;
       } else {
-        alert(`Failed to book appointment: ${data.message || 'Unknown error'}`);
+        alert('Failed to book appointment');
         return null;
       }
     } catch (err) {
@@ -123,7 +115,8 @@ const [bookingId, setBookingId] = useState(null);
       return null;
     }
   };
-  
+
+
   const arrayBufferToBase64 = (buffer) => {
     let binary = '';
     const bytes = new Uint8Array(buffer);
@@ -134,82 +127,79 @@ const [bookingId, setBookingId] = useState(null);
   };
 
   const handleBookingAndPayment = async () => {
-    const bookingResult = await handleBooking(); // Wait for the booking to complete
+    const bookingResult = await handleBooking();
     if (bookingResult) {
-      setBookingId(bookingResult); // Ensure the bookingId is set
-      setShowPayment(true); // Enable the payment button after successful booking
+      await makePayment();
     }
   };
   
-  
   if (loading || !doctor) return <div>Loading...</div>;
-
-
   const makePayment = async () => {
-  if (!bookingId) {
-    alert('Booking ID not found. Please try again.');
-    return;
-  }
-
-  if (!doctor?.Consultation_Fee || !doctor?.name1 || !doctor?.Speciality) {
-    alert('Missing doctor details. Please ensure all doctor information is provided.');
-    return;
-  }
-
-  if (!user?.email) {
-    alert('Email is required for payment.');
-    return;
-  }
-
-  // Load Stripe script only if it is not already loaded
-  const stripe = await loadStripe('pk_test_51PuIv9Rt4bZZiTQmbMvH1ZRG2w26Pl6vhQfqxjTuX1DsDfM190vQVOW19uxP474IhAkuGeSZt5PVOZM3ui1ZbK0G002M2Bu3bm');
-  const fees = Math.round(parseFloat(doctor.Consultation_Fee) * 100); // Convert fees to paise
-
-  try {
-    const response = await fetch('http://localhost:3001/api/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        items: [
-          {
-            name: `Consultation with Dr. ${doctor.name1}`,
-            description: `${doctor.Speciality}`,
-            price_data: {
-              unit_amount: fees,
-              currency: 'inr',
-            },
-            quantity: 1,
-          },
-        ],
-        email: user.email, // User email for payment receipt
-        bookingId: bookingId, // Pass the booking ID
-      }),
-    });
-
-    if (response.ok) {
-      const session = await response.json();
-      const result = await stripe.redirectToCheckout({
-        sessionId: session.sessionId,
+    const stripe = await loadStripe('pk_test_51PuIv9Rt4bZZiTQmbMvH1ZRG2w26Pl6vhQfqxjTuX1DsDfM190vQVOW19uxP474IhAkuGeSZt5PVOZM3ui1ZbK0G002M2Bu3bm');
+    const fees = Math.round(parseFloat(doctor?.Consultation_Fee) * 100);
+    const body = {
+      products: [
+        {
+          name: doctor.Name1, // Doctor's name
+          description: doctor.speciality, // Doctor's specialty
+          amount: fees, // Convert fees from rupees to paise
+          currency: 'inr', // Currency for the payment (Indian Rupees)
+        },
+      ],
+      appointment_date: selectedDate,
+      appointment_time: selectedTime,
+      patient_name: "Test Patient", // You can collect this via a form if needed
+    };
+    
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    try {
+      const response = await fetch('http://localhost:3001/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              price_data: {
+                currency: 'inr',
+                product_data: {
+                  name: `Consultation with Dr. ${doctor?.name1}`,
+                  description: `Appointment on ${selectedDate} at ${selectedTime}`
+                },
+                unit_amount: fees,
+              },
+              quantity: 1
+            }
+          ],
+          email: user.email,
+          bookingId
+        }),
       });
-
-      if (result.error) {
-        alert(`Payment failed: ${result.error.message}`);
+    
+      if (response.ok) {
+        const session = await response.json();
+        const result = await stripe.redirectToCheckout({
+          sessionId: session.id,
+        });
+    
+        if (result.error) {
+          alert(result.error.message);
+        }
       } else {
-        console.log('Redirected to Stripe Checkout');
+        const errorData = await response.json();
+        alert(`Error initiating payment: ${errorData.error}`);
       }
-    } else {
-      const errorData = await response.json();
-      alert(`Error initiating payment: ${errorData.error || 'Unknown error'}`);
+    } catch (error) {
+      console.error('Error during payment:', error);
+      alert('Payment failed');
     }
-  } catch (error) {
-    console.error('Error during payment:', error);
-    alert('Payment failed. Please try again later.');
-  }
-};
+  };
+    
 
-  
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -310,19 +300,20 @@ const [bookingId, setBookingId] = useState(null);
           </>
         )}
 
-{showPayment ? (
-  <button
-    className="w-full md:w-auto bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700"
-    onClick={makePayment} // Only invoke makePayment here
-  >
-    Make Payment
-  </button>
-) : (
+{!showPayment ? (
   <button
     onClick={handleBookingAndPayment}
     className="w-full md:w-auto bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700"
   >
-    Book Appointment & Proceed to Payment
+    Book Appointment
+  </button>
+) 
+: (
+  <button
+    className="w-full md:w-auto bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700"
+    onClick={makePayment}
+  >
+    Make Payment
   </button>
 )}
 

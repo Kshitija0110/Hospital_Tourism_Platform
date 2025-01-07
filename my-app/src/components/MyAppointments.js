@@ -12,6 +12,7 @@ const MyAppointments = () => {
     const fetchAppointments = async () => {
       try {
         const response = await fetch(`http://localhost:3001/api/appointments?username=${user.name}`);
+        console.log(`usernameis:"${user.name}`);
         const data = await response.json();
         setAppointments(data);
       } catch (error) {
