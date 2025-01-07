@@ -320,7 +320,7 @@ const procedureImages = {
   )}
 
   <button 
-    onClick={() => navigate('/doctors')} 
+    onClick={() => navigate('/hospitals')} 
     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
   >
     <Plus className="h-5 w-5" />
