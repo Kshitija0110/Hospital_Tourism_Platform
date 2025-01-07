@@ -1,6 +1,6 @@
 import axios from 'axios';
-import React, { useState,useEffect } from 'react';
-import { Search,  Lock,MapPin, Calendar,Phone,Linkedin,Twitter,Instagram, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Lock, MapPin, Calendar, Phone, Linkedin, Twitter, Instagram, Star, Heart, Activity, MessageCircle, X, Send, Plus, Stethoscope, FileText, Video, Clock, Camera, DollarSign, Globe, User, Settings, BedDouble, Clipboard } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/card';
 import doctorPatientImage from '../assets/p.jpg';
@@ -21,26 +21,26 @@ const MedicalTourismPlatform = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('search');
   const [showAuthModal, setShowAuthModal] = useState(false);
-const [isLogin, setIsLogin] = useState(true);
-const [isMenuOpen, setIsMenuOpen] = useState(false);
-const [authData, setAuthData] = useState({
-  name: '',
-  email: '',
-  password: ''
-});
+  const [isLogin, setIsLogin] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [authData, setAuthData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
 
-const [registrationStage, setRegistrationStage] = useState('initial'); // 'initial', 'login', 'signup'
+  const [registrationStage, setRegistrationStage] = useState('initial'); // 'initial', 'login', 'signup'
 
-const { isAuthenticated, user, login, logout } = useAuth();
-const procedureImages = {
-  'Cardiac Surgery': cardiology,
-  'Joint Replacement': orthopedic,
-  'Dental Treatment': dental
-};
+  const { isAuthenticated, user, login, logout } = useAuth();
+  const procedureImages = {
+    'Cardiac Surgery': cardiology,
+    'Joint Replacement': orthopedic,
+    'Dental Treatment': dental
+  };
 
-// const [isAuthenticated, setIsAuthenticated] = useState(false);
-// const [user, setUser] = useState(null);
- 
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [user, setUser] = useState(null);
+
   const [selectedFilters, setSelectedFilters] = useState({
     procedure: '',
     location: '',
@@ -54,7 +54,7 @@ const procedureImages = {
   const [newMessage, setNewMessage] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userType, setUserType] = useState(null);
-  
+
   const sendMessage = async () => {
     if (newMessage.trim()) {
       setMessages([...messages, { id: Date.now(), text: newMessage, isBot: false }]);
@@ -82,7 +82,7 @@ const procedureImages = {
         },
         body: JSON.stringify(doctorData),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         login(data.user);
@@ -111,7 +111,7 @@ const procedureImages = {
           userType
         }),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         if (userType === 'doctor' && !isLogin) {
@@ -133,7 +133,7 @@ const procedureImages = {
       alert('Authentication failed');
     }
   };
-  
+
 
   const handleGoogleSignIn = async () => {
     try {
@@ -145,7 +145,7 @@ const procedureImages = {
           email: result.user.email,
           userType: userType // Include the user type
         };
-        
+
         // Send to backend with user type
         const response = await fetch('http://localhost:3001/auth/google', {
           method: 'POST',
@@ -232,7 +232,7 @@ const procedureImages = {
         </Card>
       ))}
 
-      
+
     </div>
   );
 
@@ -242,89 +242,89 @@ const procedureImages = {
         setIsMenuOpen(false);
       }
     };
-  
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
   return (
     <div className="px-8">
-    {/* Sticky Header */}
-    <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-xl">
-            <Stethoscope className="h-6 w-6 text-white" />
+      {/* Sticky Header */}
+      <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-2 rounded-xl">
+              <Stethoscope className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+              HealthJourney Global
+            </h1>
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            HealthJourney Global
-          </h1>
+
+
+          <button
+            onClick={() => navigate('/my-appointments')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
+          >
+            <Calendar className="h-5 w-5" />
+            My Appointments
+          </button>
+
+
+          {isAuthenticated && user ? (
+            <div className="relative menu-container">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
+              >
+                <User className="h-5 w-5 text-blue-600" />
+                <span className="text-gray-600">Welcome, {user.name}</span>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border">
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowAuthModal(false);
+                      setIsMenuOpen(false);
+                      navigate('/');
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
+            >
+              <User className="h-5 w-5" />
+              Sign In
+            </button>
+          )}
+
+          <button
+            onClick={() => navigate('/hospitals')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            <Plus className="h-5 w-5" />
+            Book Consultation
+          </button>
+
+          <button
+            onClick={() => navigate('/adminhome')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
+            <Lock className="h-5 w-5" />
+            Admin
+          </button>
         </div>
-
-
-        <button 
-    onClick={() => navigate('/my-appointments')} 
-    className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
-  >
-    <Calendar className="h-5 w-5" />
-    My Appointments
-  </button>
-
-
-  {isAuthenticated && user ? (
-    <div className="relative menu-container">
-    <button 
-      onClick={() => setIsMenuOpen(!isMenuOpen)}
-      className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
-    >
-      <User className="h-5 w-5 text-blue-600" />
-      <span className="text-gray-600">Welcome, {user.name}</span>
-    </button>
-    {isMenuOpen && (
-      <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-xl border">
-        <button
-          onClick={() => {
-            logout();
-            setShowAuthModal(false);
-            setIsMenuOpen(false);
-            navigate('/');
-          }}
-          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-        >
-          Logout
-        </button>
       </div>
-    )}
-  </div>
-  ) : (
-    <button 
-      onClick={() => setShowAuthModal(true)} 
-      className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-50"
-    >
-      <User className="h-5 w-5" />
-      Sign In
-    </button>
-  )}
 
-  <button 
-    onClick={() => navigate('/hospitals')} 
-    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-  >
-    <Plus className="h-5 w-5" />
-    Book Consultation
-  </button>
 
-  <button 
-   onClick={() => navigate('/adminhome')} 
-   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
- >
-   <Lock className="h-5 w-5" />
-   Admin
- </button>
-</div>
-  </div>
-  
-      
 
       {/* Hero Section */}
       {/* Hero Section */}
@@ -341,9 +341,9 @@ const procedureImages = {
           </div>
         </div>
 
-        
+
         <div
-          className="absolute inset-0 z-0"  
+          className="absolute inset-0 z-0"
           style={{
             clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 50% 100%)',
             background: 'linear-gradient(rgba(37, 99, 235, 0.8), rgba(37, 99, 235, 0.6))'
@@ -355,7 +355,7 @@ const procedureImages = {
             className="w-full h-[-150%] object-cover"
           />
         </div>
-   </div>
+      </div>
 
 
 
@@ -389,7 +389,7 @@ const procedureImages = {
         <Activity className="h-4 w-4" />
         <AlertTitle>Here's your personalized health Insight</AlertTitle>
         <AlertDescription>
-          Based on your profile and current health needs, we recommend exploring cardiac treatments 
+          Based on your profile and current health needs, we recommend exploring cardiac treatments
           in Thailand during October-November for optimal weather and pricing.
         </AlertDescription>
       </Alert>
@@ -403,11 +403,11 @@ const procedureImages = {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {procedures.map(proc => (
             <Card key={proc.id} className="hover:shadow-lg transition-all">
-              <img 
-        src={procedureImages[proc.name]} 
-        alt={proc.name}
-        className="w-full h-48 object-cover rounded-t-lg"
-      />
+              <img
+                src={procedureImages[proc.name]}
+                alt={proc.name}
+                className="w-full h-48 object-cover rounded-t-lg"
+              />
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-3">{proc.name}</h3>
                 <div className="flex items-center gap-2 text-gray-600 mb-2">
@@ -469,234 +469,234 @@ const procedureImages = {
 
       <div className="mt-8 flex justify-center">
         <button
-          onClick={() => navigate('/hospitals')}
+          onClick={() => navigate('/doctors')}
           className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >
-          <BedDouble className="h-5 w-5" />
-          View All Hospitals
+          <Stethoscope className="h-5 w-5" />
+          View All Doctors
         </button>
       </div>
 
 
-{showAuthModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
-    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div className="bg-white rounded-lg p-8 max-w-md w-full  max-h-[90vh] overflow-y-auto">
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg p-8 max-w-md w-full  max-h-[90vh] overflow-y-auto">
 
-      <div className="flex justify-between items-center mb-6 top-0 bg-white pb-4">
-        <h2 className="text-2xl font-bold text-center flex-grow">
-        {userType === 'doctor' ? (
-      registrationStage === 'login' ? 'Sign In' : 'Sign Up'
-    ) : (
-      isLogin ? 'Sign In' : 'Create Account'
-    )}
-        </h2>
-        <button 
-          onClick={() => {
-            setShowAuthModal(false);
-            setUserType(null);
-            setRegistrationStage('initial');
-          }}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <X className="h-6 w-6" />
-        </button>
-      </div>
-
-       {/* User Type Selection */}
-      {!userType ? (
-        <div className="mb-6">
-          <h3 className="text-center text-lg font-medium mb-4">Select User Type</h3>
-          <div className="flex justify-center gap-8">
-            <div
-              onClick={() =>{
-                 setUserType('doctor');
-                 setRegistrationStage('login');
-                }}
-              className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              
-              <img 
-          src={doctorIcon} 
-          alt="Doctor"
-          className="w-24 h-24 object-cover rounded-full border-2"
-        />
-         
-              <span className="font-medium">Doctor</span>
-            </div>
-            <div
-              onClick={() => setUserType('patient')}
-              className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              
-              <img 
-          src={patientIcon} 
-          alt="Patient"
-          className="w-24 h-24 object-cover rounded-full border-2 border-black-600"
-        />
-             
-              <span className="font-medium">Patient</span>
-            </div>
-          </div>
-        </div>
-      ) : (
-        userType === 'doctor' ? (
-          registrationStage === 'login' ? (
-            // Doctor Login Form
-            <form onSubmit={handleAuthSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={authData.email}
-                    onChange={(e) => setAuthData({...authData, email: e.target.value})}
-                    className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-      
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <input
-                    type="password"
-                    value={authData.password}
-                    onChange={(e) => setAuthData({...authData, password: e.target.value})}
-                    className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-      
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-              >
-                Sign 
-              </button>
-              <button
-   type="button"
-   onClick={handleGoogleSignIn}
-   className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50"
- >
-   <img 
-     src={googleIcon} 
-     alt="Google"
-     className="w-5 h-5"
-   />
-   Continue with Google
- </button>
- 
-              <p className="text-center text-sm text-gray-600">
-                Don't have an account?{" "}
+              <div className="flex justify-between items-center mb-6 top-0 bg-white pb-4">
+                <h2 className="text-2xl font-bold text-center flex-grow">
+                  {userType === 'doctor' ? (
+                    registrationStage === 'login' ? 'Sign In' : 'Sign Up'
+                  ) : (
+                    isLogin ? 'Sign In' : 'Create Account'
+                  )}
+                </h2>
                 <button
-                  type="button"
-                  onClick={() => setRegistrationStage('signup')}
-                  className="text-blue-600 hover:underline"
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setUserType(null);
+                    setRegistrationStage('initial');
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  Sign Up
+                  <X className="h-6 w-6" />
                 </button>
-              </p>
-            </form>
+              </div>
 
-      
-      
-        ) : (
-          <DoctorForm onSubmit={handleDoctorSubmit} />
-        )
-      ) : (
-        <form onSubmit={handleAuthSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              value={authData.name}
-              onChange={(e) => setAuthData({...authData, name: e.target.value})}
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-        )}
+              {/* User Type Selection */}
+              {!userType ? (
+                <div className="mb-6">
+                  <h3 className="text-center text-lg font-medium mb-4">Select User Type</h3>
+                  <div className="flex justify-center gap-8">
+                    <div
+                      onClick={() => {
+                        setUserType('doctor');
+                        setRegistrationStage('login');
+                      }}
+                      className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
+                    >
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            <input
-              type="email"
-              value={authData.email}
-              onChange={(e) => setAuthData({...authData, email: e.target.value})}
-              className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
+                      <img
+                        src={doctorIcon}
+                        alt="Doctor"
+                        className="w-24 h-24 object-cover rounded-full border-2"
+                      />
+
+                      <span className="font-medium">Doctor</span>
+                    </div>
+                    <div
+                      onClick={() => setUserType('patient')}
+                      className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-blue-50 transition-colors"
+                    >
+
+                      <img
+                        src={patientIcon}
+                        alt="Patient"
+                        className="w-24 h-24 object-cover rounded-full border-2 border-black-600"
+                      />
+
+                      <span className="font-medium">Patient</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                userType === 'doctor' ? (
+                  registrationStage === 'login' ? (
+                    // Doctor Login Form
+                    <form onSubmit={handleAuthSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email
+                        </label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                          <input
+                            type="email"
+                            value={authData.email}
+                            onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
+                            className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                          <input
+                            type="password"
+                            value={authData.password}
+                            onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                            className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+                      >
+                        Sign
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50"
+                      >
+                        <img
+                          src={googleIcon}
+                          alt="Google"
+                          className="w-5 h-5"
+                        />
+                        Continue with Google
+                      </button>
+
+                      <p className="text-center text-sm text-gray-600">
+                        Don't have an account?{" "}
+                        <button
+                          type="button"
+                          onClick={() => setRegistrationStage('signup')}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Sign Up
+                        </button>
+                      </p>
+                    </form>
+
+
+
+                  ) : (
+                    <DoctorForm onSubmit={handleDoctorSubmit} />
+                  )
+                ) : (
+                  <form onSubmit={handleAuthSubmit} className="space-y-4">
+                    {!isLogin && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          value={authData.name}
+                          onChange={(e) => setAuthData({ ...authData, name: e.target.value })}
+                          className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <input
+                          type="email"
+                          value={authData.email}
+                          onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
+                          className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <input
+                          type="password"
+                          value={authData.password}
+                          onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                          className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      {isLogin ? 'Sign In' : 'Create Account'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50"
+                    >
+                      <User className="h-5 w-5" />
+                      Continue with Google
+                    </button>
+
+                    <p className="text-center text-sm text-gray-600">
+                      {isLogin ? "Don't have an account? " : "Already have an account? "}
+                      <button
+                        type="button"
+                        onClick={() => setIsLogin(!isLogin)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {isLogin ? 'Sign Up' : 'Sign In'}
+                      </button>
+                    </p>
+                  </form>
+                ))}
+            </div>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            <input
-              type="password"
-              value={authData.password}
-              onChange={(e) => setAuthData({...authData, password: e.target.value})}
-              className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-        >
-          {isLogin ? 'Sign In' : 'Create Account'}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50"
-        >
-          <User className="h-5 w-5" />
-          Continue with Google
-        </button>
-
-        <p className="text-center text-sm text-gray-600">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-600 hover:underline"
-          >
-            {isLogin ? 'Sign Up' : 'Sign In'}
-          </button>
-        </p>
-      </form>
-      ))}
-    </div>
-  </div>
-  </div>
-  
-)}
+      )}
 
 
-      
+
       {/* Chatbot */}
       <div>
         {/* Chat Button */}
@@ -749,67 +749,67 @@ const procedureImages = {
             </div>
           </div>
         )}
-      
-<footer className="bg-blue-600 text-white mt-16 py-12">
-  <div className="max-w-6xl mx-auto px-6">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {/* Contact Info */}
-      <div>
-        <h3 className="text-xl font-bold mb-4">Contact Us</h3>
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Mail className="h-5 w-5" />
-            <a href="mailto:info@medicaltourism.com">info@medicaltourism.com</a>
+
+        <footer className="bg-blue-600 text-white mt-16 py-12">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Contact Info */}
+              <div>
+                <h3 className="text-xl font-bold mb-4">Contact Us</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    <a href="mailto:info@medicaltourism.com">info@medicaltourism.com</a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    <span>+1 (555) 123-4567</span>
+                  </div>
+                  <div className="flex items-center gap-4 mt-4">
+                    <a href="#" className="hover:text-blue-200"><Linkedin className="h-6 w-6" /></a>
+                    <a href="#" className="hover:text-blue-200"><Twitter className="h-6 w-6" /></a>
+                    <a href="#" className="hover:text-blue-200"><Instagram className="h-6 w-6" /></a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <h3 className="text-xl font-bold mb-4">Our Location</h3>
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-5 w-5 mt-1" />
+                  <div>
+                    <p>123 Healthcare Avenue</p>
+                    <p>Medical District</p>
+                    <p>New York, NY 10001</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Services */}
+              <div>
+                <h3 className="text-xl font-bold mb-4">Our Services</h3>
+                <ul className="space-y-2">
+                  <li>Medical Tourism Packages</li>
+                  <li>International Patient Care</li>
+                  <li>Hospital Networks</li>
+                  <li>Treatment Planning</li>
+                  <li>Travel Assistance</li>
+                  <li>Post-treatment Support</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="border-t border-blue-400 mt-8 pt-8 text-center">
+              <p>&copy; 2024 Medical Tourism Platform. All rights reserved.</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
-            <span>+1 (555) 123-4567</span>
-          </div>
-          <div className="flex items-center gap-4 mt-4">
-            <a href="#" className="hover:text-blue-200"><Linkedin className="h-6 w-6" /></a>
-            <a href="#" className="hover:text-blue-200"><Twitter className="h-6 w-6" /></a>
-            <a href="#" className="hover:text-blue-200"><Instagram className="h-6 w-6" /></a>
-          </div>
-        </div>
+        </footer>
+
       </div>
 
-      {/* Location */}
-      <div>
-        <h3 className="text-xl font-bold mb-4">Our Location</h3>
-        <div className="flex items-start gap-2">
-          <MapPin className="h-5 w-5 mt-1" />
-          <div>
-            <p>123 Healthcare Avenue</p>
-            <p>Medical District</p>
-            <p>New York, NY 10001</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Services */}
-      <div>
-        <h3 className="text-xl font-bold mb-4">Our Services</h3>
-        <ul className="space-y-2">
-          <li>Medical Tourism Packages</li>
-          <li>International Patient Care</li>
-          <li>Hospital Networks</li>
-          <li>Treatment Planning</li>
-          <li>Travel Assistance</li>
-          <li>Post-treatment Support</li>
-        </ul>
-      </div>
     </div>
 
-    <div className="border-t border-blue-400 mt-8 pt-8 text-center">
-      <p>&copy; 2024 Medical Tourism Platform. All rights reserved.</p>
-    </div>
-  </div>
-</footer>
-
-      </div>
-    
-</div>
-   
   );
 };
 export default MedicalTourismPlatform;

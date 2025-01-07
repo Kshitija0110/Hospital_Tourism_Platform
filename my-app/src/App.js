@@ -42,6 +42,8 @@ function App() {
 
       <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
 
+      <Route path="/doctors" element={<DoctorsList />} />
+
     </Routes>
   </Router>
   </AuthProvider>
