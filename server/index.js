@@ -1,26 +1,26 @@
 // No code was selected, so I will provide a general improvement to the code
-
+//Use validation middleware for routes that require validation
+app.use('/api/validation', validate);
+const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
+const axios = require('axios');
+const stripe = require('stripe')('sk_test_51PuIv9Rt4bZZiTQmr0U87nNDcUzmGBTfWchvytdyubaejLVPoThw4F4M9AyPL475JkrNz6WAUAcp9CK0lUvcWO4G00ZAXydEPe');
+const multer = require('multer');
+require('dotenv').config();
+const upload = multer();
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Add error handling middleware
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// Add rate limiting middleware
-const rateLimit = require('express-rate-limit');
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
 
-// Add helmet middleware for security
-const helmet = require('helmet');
-app.use(helmet());
 
-// Add morgan middleware for logging
-const morgan = require('morgan');
-app.use(morgan('combined'));
 
 // Add cors middleware with options
 app.use(cors({
@@ -51,19 +51,7 @@ const validate = (req, res, next) => {
   next();
 };
 
-// Use validation middleware for routes that require validation
-app.use('/api/validation', validate);const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors');
-const axios = require('axios');
-const stripe = require('stripe')('sk_test_51PuIv9Rt4bZZiTQmr0U87nNDcUzmGBTfWchvytdyubaejLVPoThw4F4M9AyPL475JkrNz6WAUAcp9CK0lUvcWO4G00ZAXydEPe');
-const multer = require('multer');
-require('dotenv').config();
-const upload = multer();
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 
 // AWS RDS MySQL connection
 const pool = mysql.createPool({
