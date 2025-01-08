@@ -1,6 +1,3 @@
-// No code was selected, so I will provide a general improvement to the code
-//Use validation middleware for routes that require validation
-app.use('/api/validation', validate);
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -13,12 +10,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
 // Add error handling middleware
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
-
 
 
 
@@ -50,6 +48,17 @@ const validate = (req, res, next) => {
   if (error) return res.status(400).json({ error: error.details[0].message });
   next();
 };
+
+
+// Use validation middleware for routes that require validation
+app.use('/api/validation', validate);
+
+
+
+
+
+
+
 
 
 
